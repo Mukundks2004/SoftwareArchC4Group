@@ -1,0 +1,46 @@
+@startuml
+!include https://raw.githubusercontent.com/kirchsth/C4-PlantUML/extended/C4_Container.puml
+
+AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+
+LAYOUT_WITH_LEGEND()
+
+title University Course Management System - Container Diagram
+
+Person(student, "Student", "Interacts with the web application to enroll in courses.")
+Person(faculty, "Faculty", "Manages courses and views student performance.")
+Person(admin, "Administrator", "Manages courses and generates reports.")
+
+System(UCMS, "University Course Management System", "Handles course enrollments, student records, and reporting.") {
+    Container(webApp, "Web Application", "Vue.js", "Interface for students, faculty, and admins.")
+    Container(api, "API", "ASP.NET Core", "Processes requests and manages business logic.")
+    ContainerDb(academicDb, "Academic Records Database", "SQL Database", "Stores student records and course data.")
+    Container(sisIntegration, "SIS Integration Service", "Spring Boot", "Syncs data with the Student Information System.")
+    Container(authService, "Authentication Service", "OAuth 2.0", "Handles user authentication and access control.")
+    Container(backupService, "Backup Service", "Cloud Backup", "Backs up student and course data for recovery.")
+}
+
+System_Ext(SIS, "Student Information System (SIS)", "External system for syncing student and course data.")
+System_Ext(backupSystem, "Cloud Backup System", "Provides data backup and recovery.")
+System_Ext(authSystem, "Authentication System", "Handles Single Sign-On (SSO).")
+
+Rel_D(student, webApp, "Interacts with the system", $tags="sync")
+Rel_D(faculty, webApp, "Manages courses", $tags="sync")
+Rel_D(admin, webApp, "Generates reports", $tags="sync")
+
+Rel(webApp, api, "Sends requests and retrieves data", $tags="sync")
+Rel(api, academicDb, "Reads/Writes student and course data", $tags="sync")
+Rel(api, sisIntegration, "Syncs with SIS", $tags="sync")
+Rel(api, authService, "Handles authentication", $tags="sync")
+Rel(api, backupService, "Triggers backups", $tags="sync")
+
+Rel(academicDb, api, "Reads/Writes student and course data", $tags="sync")
+Rel(sisIntegration, api, "Syncs with SIS", $tags="sync")
+Rel(authService, api, "Handles authentication", $tags="sync")
+Rel(backupService, api, "Triggers backups", $tags="sync")
+
+Rel(sisIntegration, SIS, "Syncs course and student data", $tags="sync")
+Rel(backupService, backupSystem, "Backs up data", $tags="sync")
+Rel(authService, authSystem, "Handles authentication via SSO", $tags="sync")
+
+@enduml
