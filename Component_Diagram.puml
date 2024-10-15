@@ -1,13 +1,21 @@
 @startuml UCMS_ERD
 
 ' Define entity types
-entity "Student" as Student {
-  * StudentID : PK
+entity "User" as User {
+  * UserID : PK
   --
-  FirstName
-  LastName
-  DateOfBirth
+  Username
+  PasswordHash
   Email
+  UserType
+  LastLogin
+  AccountStatus
+}
+
+entity "Student" as Student {
+  * StudentID : PK, FK to User
+  --
+  DateOfBirth
   PhoneNumber
   Address
   EnrollmentDate
@@ -15,14 +23,28 @@ entity "Student" as Student {
 }
 
 entity "Faculty" as Faculty {
-  * FacultyID : PK
+  * FacultyID : PK, FK to User
   --
   FirstName
   LastName
-  Email
   PhoneNumber
   DepartmentID : FK
   Title
+}
+
+entity "Administrator" as Administrator {
+  * AdminID : PK, FK to User
+  --
+  FirstName
+  LastName
+  PhoneNumber
+}
+
+entity "Department" as Department {
+  * DepartmentID : PK
+  --
+  DepartmentName
+  DepartmentCode
 }
 
 entity "Course" as Course {
@@ -75,16 +97,6 @@ entity "HECS" as HECS {
   RepaymentStatus
 }
 
-
-entity "Administrator" as Administrator {
-  * AdminID : PK
-  --
-  FirstName
-  LastName
-  Email
-  PhoneNumber
-}
-
 entity "Reports" as Reports {
   * ReportID : PK
   --
@@ -114,17 +126,13 @@ entity "SystemLog" as SystemLog {
   Status
 }
 
-entity "User" as User {
-  * UserID : PK
-  --
-  Username
-  PasswordHash
-  Role
-  LastLogin
-  AccountStatus
-}
 
 ' Define relationships with cardinality
+
+' User ↔ Student, Faculty, Administrator
+User ||--|| Student : "is a"
+User ||--|| Faculty : "is a"
+User ||--|| Administrator : "is a"
 
 ' Student ↔ Enrollment
 Student ||--o{ Enrollment : "enrolls in"
@@ -133,20 +141,12 @@ Student ||--o{ Enrollment : "enrolls in"
 Course ||--o{ Enrollment : "has"
 
 ' Course ↔ Section
-Course ||--o{ Section : "has sections"
+Course ||--o{ Section : "has"
 
 ' Faculty ↔ Section
 Faculty ||--o{ Section : "teaches"
 
 ' Department ↔ Faculty
-entity "Department" as Department {
-  * DepartmentID : PK
-  --
-  DepartmentName
-  DepartmentCode
-  ChairID : FK
-}
-
 Department ||--o{ Faculty : "has"
 
 ' Department ↔ Course
@@ -158,7 +158,7 @@ Enrollment ||--|| AcademicRecord : "has"
 ' Student ↔ HECS
 Student ||--o{ HECS : "has"
 
-' Administrator ↔ ReportingTool
+' Administrator ↔ Reports
 Administrator ||--o{ Reports : "creates"
 
 ' Student ↔ Payment
@@ -166,10 +166,5 @@ Student ||--o{ Payment : "makes"
 
 ' SystemLog ↔ User
 User ||--o{ SystemLog : "performs"
-
-' User ↔ Student, Faculty, Administrator
-User ||--|| Student : "is a"
-User ||--|| Faculty : "is a"
-User ||--|| Administrator : "is a"
 
 @enduml
