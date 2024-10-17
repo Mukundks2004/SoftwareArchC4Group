@@ -1,4 +1,4 @@
-@startuml University Course Management System - Data Warehouse Integration
+@startuml University Course Management System - Data Integration
 !include https://raw.githubusercontent.com/kirchsth/C4-PlantUML/extended/C4_Container.puml
 
 AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
@@ -6,7 +6,7 @@ AddRelTag("event", $textColor="blue", $lineColor="blue", $lineStyle = DottedLine
 
 LAYOUT_WITH_LEGEND()
 
-title University Course Management System - Container Diagram (With Data Warehouse Integration)
+title University Course Management System - Container Diagram
 
 skinparam Arrow {
   FontColor black

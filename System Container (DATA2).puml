@@ -6,8 +6,7 @@ AddRelTag("event", $textColor="blue", $lineColor="blue", $lineStyle = DottedLine
 
 LAYOUT_WITH_LEGEND()
 
-title University Course Management System - Container Diagram (Microservices + Event-Driven + Data Architecture)
-
+title University Course Management System - Container Diagram
 skinparam Arrow {
   FontColor black
   CaptionFontStyle bold
