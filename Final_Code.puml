@@ -1,0 +1,96 @@
+@startuml UCMS_Code_Diagram
+
+title UCMS - Code Diagram (Classes & Relationships)
+
+' Define main entities and their attributes
+class Student {
+  + int StudentID <<PK>>
+  + string FirstName
+  + string LastName
+  + EnrollInCourse(Course course)
+}
+
+class Course {
+  + int CourseID <<PK>>
+  + string CourseName
+  + string CourseCode
+  + int Credits
+  + ManageEnrollment(Enrollment enrollment)
+}
+
+class Enrollment {
+  + int EnrollmentID <<PK>>
+  + int StudentID <<FK>> -- References Student.StudentID
+  + int CourseID <<FK>> -- References Course.CourseID
+  + string EnrollmentStatus
+}
+
+class AcademicRecord {
+  + int RecordID <<PK>>
+  + int StudentID <<FK>> -- References Student.StudentID
+  + int CourseID <<FK>> -- References Course.CourseID
+  + string Grade
+}
+
+class NotificationService {
+  + SendEnrollmentSuccessNotification(Student student, Course course)
+  + SendGradeNotification(Student student, AcademicRecord record)
+}
+
+class ReportingService {
+  + GenerateEnrollmentReport()
+  + GenerateStudentPerformanceReport()
+}
+
+class BackupService {
+  + BackupAcademicData()
+  + RestoreAcademicData()
+}
+
+class CourseRepository {
+  + AddCourse(Course course)
+  + GetCourse(int courseID)
+  + UpdateCourse(Course course)
+  + RemoveCourse(int courseID)
+}
+
+class StudentRepository {
+  + AddStudent(Student student)
+  + GetStudent(int studentID)
+  + UpdateStudent(Student student)
+  + RemoveStudent(int studentID)
+}
+
+class ETLPipeline {
+  + ExtractData()
+  + TransformData()
+  + LoadData()
+}
+
+class AcademicRecordsDatabase {
+  + StoreStudentRecord(Student student)
+  + StoreCourseRecord(Course course)
+}
+
+class DataWarehouse {
+  + StoreAggregatedData()
+  + GenerateAnalytics()
+}
+
+' Define relationships
+Student "1" --> "*" Enrollment : "enrolls in"
+Course "1" --> "*" Enrollment : "is enrolled in"
+Student "1" --> "*" AcademicRecord : "has"
+Course "1" --> "*" AcademicRecord : "is recorded in"
+CourseRepository "1" --> "*" Course : "manages"
+StudentRepository "1" --> "*" Student : "manages"
+BackupService --> AcademicRecordsDatabase : "backs up"
+ReportingService --> DataWarehouse : "generates reports from"
+ETLPipeline --> DataWarehouse : "loads transformed data into"
+ETLPipeline --> AcademicRecordsDatabase : "extracts data from"
+NotificationService --> Student : "notifies enrollment and performance"
+NotificationService --> AcademicRecord : "notifies grades"
+ReportingService --> Student : "generates performance reports"
+ReportingService --> Course : "generates enrollment reports"
+
+@enduml
