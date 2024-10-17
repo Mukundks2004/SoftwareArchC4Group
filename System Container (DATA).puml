@@ -1,0 +1,79 @@
+@startuml University Course Management System - Data Warehouse Integration
+!include https://raw.githubusercontent.com/kirchsth/C4-PlantUML/extended/C4_Container.puml
+
+AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+AddRelTag("event", $textColor="blue", $lineColor="blue", $lineStyle = DottedLine())
+
+LAYOUT_WITH_LEGEND()
+
+title University Course Management System - Container Diagram (With Data Warehouse Integration)
+
+skinparam Arrow {
+  FontColor black
+  CaptionFontStyle bold
+  Color black
+  Style dashed
+}
+
+' External Users
+Person(student, "Student", "Enrolls in courses and views academic records.")
+Person(faculty, "Faculty", "Manages courses and views student performance.")
+Person(admin, "Administrator", "Generates reports and manages student and course data.")
+
+' Core System (Microservices)
+System(UCMS, "University Course Management System", "Handles enrollments, student records, reporting, and integration with external systems.") {
+
+    Container(webApp, "Web Application", "Vue.js", "Provides an interface for students, faculty, and admins.")
+    Container(courseService, "Course Enrollment Service", "Spring Boot", "Manages course offerings and student enrollments.")
+    Container(studentService, "Student Record Service", "Spring Boot", "Handles student academic records and data storage.")
+    Container(sisIntegration, "SIS Integration Service", "Spring Boot", "Syncs data with the external Student Information System (SIS).")
+    Container(reportingService, "Reporting Service", "Node.js", "Generates academic performance and enrollment reports for admins and faculty.")
+    Container(authService, "Authentication Service", "OAuth 2.0", "Manages user authentication and role-based access control.")
+    Container(notificationService, "Notification Service", "Node.js", "Sends notifications to users based on system events (e.g., enrollment status).")
+    Container(backupService, "Backup Service", "Cloud Backup", "Backs up academic data to ensure data recoverability.")
+
+    ' Database Containers
+    ContainerDb(academicDb, "Academic Records Database", "SQL Database", "Stores student records, course data, and enrollment history.")
+    ContainerDb(dataWarehouse, "Data Warehouse", "OLAP Database", "Stores historical data for analytics and reporting (ETL pipeline).")
+    Container(etlPipeline, "ETL Pipeline", "Python/Spark", "Extracts, transforms, and loads data into the Data Warehouse for reporting and analytics.")
+
+}
+
+' External Systems
+System_Ext(SIS, "Student Information System (SIS)", "External system for managing official student and course data.")
+System_Ext(backupSystem, "Cloud Backup System", "Provides cloud-based backup and recovery.")
+System_Ext(authSystem, "University SSO", "Handles Single Sign-On (SSO) for user authentication.")
+
+' User interactions
+Rel(student, webApp, "Interacts with the web interface", $tags="sync")
+Rel(faculty, webApp, "Interacts with the web interface", $tags="sync")
+Rel(admin, webApp, "Interacts with the web interface", $tags="sync")
+
+' Service interactions
+Rel_D(webApp, courseService, "Enrolls in courses, views availability", $tags="sync")
+Rel_D(webApp, studentService, "Views academic records, performance", $tags="sync")
+Rel_D(webApp, reportingService, "Generates reports", $tags="sync")
+Rel_D(webApp, authService, "Handles authentication", $tags="sync")
+Rel_D(webApp, sisIntegration, "Integrates with external SIS", $tags="sync")
+
+' Event-driven interactions
+Rel_L(courseService, notificationService, event, "Notifies students on enrollment status", $tags="sync")
+Rel_R(courseService, studentService, event, "Updates student records after enrollment", $tags="sync")
+
+' Data Warehouse and ETL Pipeline
+Rel(academicDb, etlPipeline, "Extracts data for analytics", $tags="sync")
+Rel(etlPipeline, dataWarehouse, "Loads transformed data", $tags="sync")
+Rel(reportingService, dataWarehouse, "Queries for reports", $tags="sync")
+
+' External system interactions
+Rel(sisIntegration, SIS, "Syncs course and student data", $tags="sync")
+Rel(backupService, backupSystem, "Backs up data", $tags="sync")
+Rel(authService, authSystem, "Authenticates users via SSO", $tags="sync")
+
+' Database interactions
+Rel(courseService, academicDb, "Reads/Writes course enrollment data", $tags="sync")
+Rel(studentService, academicDb, "Reads/Writes student academic data", $tags="sync")
+Rel(reportingService, academicDb, "Reads student records for reports", $tags="sync")
+Rel(backupService, academicDb, "Backs up academic data", $tags="sync")
+
+@enduml
