@@ -1,0 +1,41 @@
+@startuml System_Context4
+!include https://raw.githubusercontent.com/kirchsth/C4-PlantUML/extended/C4_Container.puml
+
+AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+
+LAYOUT_WITH_LEGEND()
+
+title University Course Management System - Context Diagram (with Data Analytics Integration)
+
+' Define Actors
+Person(student, "Students", "Enroll in courses and view academic records.")
+Person(faculty, "Faculty", "Manage course offerings and track student enrollments.")
+Person(admin, "University Admin", "Manage data and generate reports.")
+Person(itDept, "IT Department", "Manage system backups, integration, and security.")
+
+' Define External Systems
+System_Ext(SIS, "Student Information System (SIS)", "External system for managing student and course data.")
+System_Ext(authSystem, "Authentication System", "Handles user authentication for students and staff.")
+System_Ext(backupSystem, "Backup System", "Provides cloud-based backup and recovery services.")
+System_Ext(dataAnalytics, "Data Analytics System", "Processes and analyzes data for institutional reporting and trends monitoring.")
+
+' Define Main System
+System(UCMS, "University Course Management System (UCMS)", "Handles course enrollments, academic records, and data reporting.")
+
+' Relationships with UCMS
+Rel(student, UCMS, "Enroll in courses, view records", $tags="sync")
+Rel(faculty, UCMS, "Manage courses, track enrollments", $tags="sync")
+Rel(admin, UCMS, "Manage data, generate reports", $tags="sync")
+Rel(itDept, UCMS, "Manage system integration and backups", $tags="sync")
+
+' External system relationships
+Rel(UCMS, SIS, "Sync student/course data", $tags="sync")
+Rel(UCMS, authSystem, "Handles user authentication", $tags="sync")
+Rel(UCMS, backupSystem, "Backs up academic data", $tags="sync")
+Rel(itDept, backupSystem, "Manage backups, ensure availability", $tags="sync")
+
+' Data Analytics Integration
+Rel(UCMS, dataAnalytics, "Provide academic data for insights and reporting", $tags="sync")
+Rel(dataAnalytics, UCMS, "Processes course enrollment and student performance data", $tags="sync")
+
+@enduml
