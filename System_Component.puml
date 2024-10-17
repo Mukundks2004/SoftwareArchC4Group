@@ -1,0 +1,43 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+
+LAYOUT_WITH_LEGEND()
+
+title UCMS - Component Diagram
+
+System_Boundary(UCMS, "University Course Management System") {
+    Container(api, "API Gateway", "Spring Boot", "Routes requests and handles HTTP requests for business logic.") {
+        Component(courseController, "CourseController", "Handles course-related endpoints (enrollment, management).")
+        Component(studentController, "StudentController", "Handles student-related endpoints (academic records).")
+        Component(reportingService, "ReportingService", "Generates academic and enrollment reports.")
+        Component(courseService, "CourseService", "Manages course enrollment, availability, and updates.")
+        Component(studentService, "StudentService", "Manages student academic records and interactions.")
+        Component(courseRepository, "CourseRepository", "Handles CRUD operations for courses.")
+        Component(studentRepository, "StudentRepository", "Handles CRUD operations for student records.")
+        Component(authService, "AuthService", "Manages user authentication and access control.")
+        Component(notificationService, "NotificationService", "Sends notifications (e.g., enrollment success).")
+        Component(backupService, "BackupService", "Manages backups of academic records and course data.")
+    }
+    ContainerDb(academicDb, "Academic Records Database", "PostgreSQL", "Stores student records, course data, and enrollment history.")
+}
+
+System_Ext(SIS, "Student Information System", "External System", "Syncs student and course data with the university SIS.")
+System_Ext(authSystem, "University SSO", "External Authentication System", "Handles Single Sign-On (SSO).")
+System_Ext(backupSystem, "Cloud Backup System", "External Backup System", "Provides cloud-based data backups.")
+
+Rel(courseController, courseService, "Processes course enrollment and management requests", $tags="sync")
+Rel(studentController, studentService, "Processes student record-related requests", $tags="sync")
+Rel(courseService, courseRepository, "Stores and retrieves course data", $tags="sync")
+Rel(studentService, studentRepository, "Stores and retrieves student records", $tags="sync")
+Rel(reportingService, academicDb, "Generates reports using student and course data", $tags="sync")
+Rel(authService, authSystem, "Authenticates users via SSO", $tags="sync")
+Rel(notificationService, courseService, "Sends notifications on enrollment updates", $tags="sync")
+Rel(backupService, backupSystem, "Backs up academic and course data", $tags="sync")
+
+Rel(courseService, academicDb, "Reads/Writes course data", $tags="sync")
+Rel(studentService, academicDb, "Reads/Writes student records", $tags="sync")
+Rel(backupService, academicDb, "Backs up course and academic data", $tags="sync")
+Rel(courseService, SIS, "Syncs course and student data with SIS", $tags="sync")
+
+@enduml
