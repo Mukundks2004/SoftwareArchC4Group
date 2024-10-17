@@ -25,17 +25,17 @@ System(UCMS, "University Course Management System", "Handles course enrollment, 
 
     ' Containers (Microservices)
     Container(webApp, "Web Application", "Vue.js", "Provides an interface for students, faculty, and admins.")
-    Container(api, "API", "ASP.NET Core", "Processes requests and manages business logic.")
-    Container(courseService, "Course Enrollment Service", "Spring Bean", "Manages course offerings, enrollments, and updates.")
-    Container(studentService, "Student Record Service", "Spring Bean", "Handles student academic records and data storage.")
-    Container(sisIntegration, "SIS Integration Service", "Spring Bean", "Syncs data with the external Student Information System (SIS).")
-    Container(reportingService, "Reporting Service", "Node.js", "Generates academic performance and enrollment reports for admins and faculty.")
-    Container(authService, "Authentication Service", "OAuth 2.0", "Manages user authentication and role-based access control.")
-    Container(notificationService, "Notification Service", "Node.js", "Sends notifications and updates to users based on events (e.g., enrollment success).")
+    Container(apiGateway, "API Gateway", "Spring ", "Routes requests to the appropriate microservices and handles security.")
+    Container(courseService, "Course Enrollment Service", "Spring ", "Manages course offerings, enrollments, and updates.")
+    Container(studentService, "Student Record Service", "Spring ", "Handles student academic records and data storage.")
+    Container(sisIntegration, "SIS Integration Service", "Spring ", "Syncs data with the external Student Information System (SIS).")
+    Container(reportingService, "Reporting Service", "Spring ", "Generates academic performance and enrollment reports for admins and faculty.")
+    Container(authService, "Authentication Service", "Spring  + OAuth 2.0", "Manages user authentication and role-based access control.")
+    Container(notificationService, "Notification Service", "Spring ", "Sends notifications and updates to users based on events (e.g., enrollment success).")
     Container(backupService, "Backup Service", "Cloud Backup", "Backs up student and course data to ensure recoverability.")
-    ContainerDb(academicDb, "Academic Records Database", "SQL Database", "Stores student records, course data, and enrollment history.")
-    ContainerDb(dataWarehouse, "Data Warehouse", "OLAP Database", "Stores historical and aggregated data for analytics and reporting.")
-    Container(etlPipeline, "ETL Pipeline", "", "Extracts, transforms, and loads data from operational systems to the data warehouse.")
+    ContainerDb(academicDb, "Academic Records Database", "PostgreSQL", "Stores student records, course data, and enrollment history.")
+    ContainerDb(dataWarehouse, "Data Warehouse", "PostgreSQL (OLAP)", "Stores historical and aggregated data for analytics and reporting.")
+    Container(etlPipeline, "ETL Pipeline", "Python/Spark", "Extracts, transforms, and loads data from operational systems to the data warehouse.")
     
 }
 
@@ -50,12 +50,13 @@ Rel(faculty, webApp, "Interacts with the web interface", $tags="sync")
 Rel(admin, webApp, "Interacts with the web interface", $tags="sync")
 
 ' Relationships between web application and microservices
-Rel(webApp, courseService, "Enrolls in courses, views course availability", $tags="sync")
-Rel(webApp, studentService, "Views student records, academic performance", $tags="sync")
-Rel(webApp, reportingService, "Generates and views reports", $tags="sync")
-Rel(webApp, authService, "Handles authentication", $tags="sync")
+Rel(webApp, apiGateway, "Routes requests", $tags="sync")
+Rel(apiGateway, courseService, "Enrolls in courses, views course availability", $tags="sync")
+Rel(apiGateway, studentService, "Views student records, academic performance", $tags="sync")
+Rel(apiGateway, reportingService, "Generates and views reports", $tags="sync")
+Rel(apiGateway, authService, "Handles authentication", $tags="sync")
 Rel(backupService, backupSystem, "Backs up data", $tags="sync")
-Rel(webApp, sisIntegration, "Handles integration of external student systems", $tags="sync")
+Rel(apiGateway, sisIntegration, "Handles integration of external student systems", $tags="sync")
 
 ' Event-driven architecture: Interactions triggered by events
 Rel_L(courseService, notificationService, event, "Notifies students on enrollment success/failure", $tags="sync")
@@ -65,11 +66,11 @@ Rel_R(courseService, studentService, event, "Updates student records after succe
 Rel(sisIntegration, SIS, "Syncs course and student data", $tags="sync")
 Rel(authService, authSystem, "Authenticates users via SSO", $tags="sync")
 
-' Relationships between API and systems
-Rel(webApp, api, "Sends requests and retrieves data", $tags="sync")
-Rel(api, sisIntegration, "Syncs with SIS", $tags="sync")
-Rel(api, authService, "Handles authentication", $tags="sync")
-Rel(api, backupService, "Triggers backups", $tags="sync")
+' Relationships between API Gateway and systems
+Rel(webApp, apiGateway, "Sends requests and retrieves data", $tags="sync")
+Rel(apiGateway, sisIntegration, "Syncs with SIS", $tags="sync")
+Rel(apiGateway, authService, "Handles authentication", $tags="sync")
+Rel(apiGateway, backupService, "Triggers backups", $tags="sync")
 
 ' Relationships between microservices and database
 Rel(courseService, academicDb, "Reads/Writes course enrollment data", $tags="sync")
