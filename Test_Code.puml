@@ -72,18 +72,11 @@ class AcademicRecordsDatabase {
   + StoreCourseRecord(Course course)
   + StoreEnrollmentRecord(Enrollment enrollment)
   + StoreAcademicRecord(AcademicRecord record)
-
 }
 
 class DataWarehouse {
   + StoreAggregatedData()
   + GenerateAnalytics()
-}
-
-class RestAPI {
-  + ExposeStudentData()
-  + ExposeCourseData()
-  + ExposeAcademicRecordData()
 }
 
 ' Define relationships
@@ -101,9 +94,9 @@ NotificationService --> Student : "notifies enrollment and performance"
 NotificationService --> AcademicRecord : "notifies grades"
 ReportingService --> Student : "generates performance reports"
 ReportingService --> Course : "generates enrollment reports"
-RestAPI --> Student : "exposes student data via REST API"
-RestAPI --> Course : "exposes course data via REST API"
-RestAPI --> AcademicRecord : "exposes academic record via REST API"
-
+AcademicRecordsDatabase --> CourseRepository : "stores course data"
+AcademicRecordsDatabase --> StudentRepository : "stores student data"
+AcademicRecordsDatabase --> Enrollment : "stores enrollment data"
+AcademicRecordsDatabase --> AcademicRecord : "stores academic record"
 
 @enduml

@@ -23,16 +23,19 @@ Person(admin, "Administrator", "Manages courses, student records, and generates 
 ' Main system - UCMS
 System(UCMS, "University Course Management System", "Handles course enrollment, student records, reporting, and integration with external services.") {
 
-    ' Containers (Microservices)
+    ' Web Application and Gateway
     Container(webApp, "Web Application", "Vue.js", "Provides an interface for students, faculty, and admins.")
     Container(apiGateway, "API Gateway", "Spring Boot", "Routes requests to the appropriate microservices and manages authentication.")
+    
+    ' Microservices
     Container(courseService, "Course Enrollment Service", "Spring Boot", "Manages course offerings, enrollments, and updates.")
     Container(studentService, "Student Record Service", "Spring Boot", "Handles student academic records and data storage.")
-    ' Container(sisIntegration, "SIS Integration Service", "Spring Boot", "Syncs data with the external Student Information System (SIS).")
-    Container(reportingService, "Reporting Service", "Spring Boot", "Generates academic performance and enrollment reports for admins and faculty.")
+    Container(reportingService, "Reporting Service", "Spring Boot", "Generates academic performance and enrollment reports.")
     Container(authService, "Authentication Service", "OAuth 2.0", "Manages user authentication and role-based access control.")
-    Container(notificationService, "Notification Service", "Spring Boot", "Sends notifications and updates to users based on events (e.g., enrollment success).")
+    Container(notificationService, "Notification Service", "Spring Boot", "Sends notifications and updates to users based on events.")
     Container(backupService, "Backup Service", "Cloud Backup", "Backs up student and course data to ensure recoverability.")
+    
+    ' Databases
     ContainerDb(academicDb, "Academic Records Database", "PostgreSQL", "Stores student records, course data, and enrollment history.")
     ContainerDb(dataWarehouse, "Data Warehouse", "PostgreSQL (OLAP)", "Stores historical and aggregated data for analytics and reporting.")
     Container(etlPipeline, "ETL Pipeline", "Python/Spark", "Extracts, transforms, and loads data from operational systems to the data warehouse.")
@@ -49,43 +52,38 @@ Rel(student, webApp, "Enrolls in courses and views records", $tags="sync")
 Rel(faculty, webApp, "Manages courses and views student performance", $tags="sync")
 Rel(admin, webApp, "Generates reports and manages courses", $tags="sync")
 
-' Event-driven architecture: Interactions triggered by events
-Rel_L(courseService, notificationService, "Notifies students on enrollment success/failure", $tags="sync")
-Rel_R(courseService, studentService, "Updates student records after successful enrollment", $tags="sync")
-
 ' Web application routing requests
 Rel(webApp, apiGateway, "Routes requests to microservices", $tags="sync")
+
+' API Gateway to microservices
+Rel(apiGateway, courseService, "Handles course enrollment requests", $tags="sync")
+Rel(apiGateway, studentService, "Handles student academic records", $tags="sync")
+Rel(apiGateway, reportingService, "Generates reports", $tags="sync")
+Rel(apiGateway, authService, "Handles authentication", $tags="sync")
+
+' Microservices to databases
+Rel(courseService, academicDb, "Reads/Writes course enrollment data", $tags="sync")
+Rel(studentService, academicDb, "Reads/Writes student academic data", $tags="sync")
+Rel(reportingService, dataWarehouse, "Generates reports from historical data", $tags="sync")
+Rel(etlPipeline, academicDb, "Extracts data from operational systems", $tags="sync")
+Rel(etlPipeline, dataWarehouse, "Loads transformed data into the data warehouse", $tags="sync")
+
+' Event-driven architecture interactions
+Rel_L(courseService, notificationService, "Notifies students on enrollment success/failure", $tags="event")
+Rel_R(studentService, notificationService, "Notifies students on academic record updates", $tags="event")
 
 ' Backup Service interactions
 Rel(backupService, backupSystem, "Backs up academic and course data", $tags="sync")
 Rel(backupService, academicDb, "Backs up student records and course data", $tags="sync")
 Rel(backupService, dataWarehouse, "Backs up historical data", $tags="sync")
 
-' Relationships between API Gateway and microservices
-Rel(apiGateway, courseService, "Handles course enrollment requests", $tags="sync")
-Rel(apiGateway, studentService, "Handles student academic records", $tags="sync")
-Rel(apiGateway, reportingService, "Generates reports", $tags="sync")
-Rel(apiGateway, authService, "Handles authentication", $tags="sync")
-
-' Relationships between microservices and databases
-Rel(courseService, academicDb, "Reads/Writes course enrollment data", $tags="sync")
-Rel(studentService, academicDb, "Reads/Writes student academic data", $tags="sync")
-Rel(reportingService, dataWarehouse, "Generates reports from historical data", $tags="sync")
-Rel_L(studentService, reportingService, "Provides student academic data for reporting", $tags="sync")
-
 ' External system interactions
 Rel(authService, authSystem, "Authenticates users via SSO", $tags="sync")
-Rel(reportingService, dataAnalytics, "Sends data for analysis", $tags="sync")
-Rel(dataAnalytics, reportingService, "Returns insights and analysis", $tags="sync")
+Rel(reportingService, dataAnalytics, "Provides academic data for analysis and insights", $tags="sync")
+Rel(dataAnalytics, reportingService, "Processes course and student performance data", $tags="sync")
 
 ' Relationships with SIS
 Rel(courseService, SIS, "Syncs course data with SIS", $tags="sync")
 Rel(studentService, SIS, "Syncs student data with SIS", $tags="sync")
 
-' Data warehouse integration and ETL pipeline
-Rel(academicDb, etlPipeline, "", $tags="sync")
-Rel(etlPipeline, academicDb, "Extracts data from operational systems", $tags="sync")
-Rel(etlPipeline, dataWarehouse, "Loads transformed data into the data warehouse", $tags="sync")
-Rel(dataWarehouse, etlPipeline, "Requests data transformations or updates", $tags="sync")
-Rel(reportingService, dataWarehouse, "Queries for analytics and reports", $tags="sync")
 @enduml

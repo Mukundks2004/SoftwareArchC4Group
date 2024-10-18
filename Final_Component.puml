@@ -26,11 +26,11 @@ System_Boundary(UCMS, "University Course Management System") {
     }
 
     ' Repositories
-    Container(courseRepository, "CourseRepository", "Spring Bean", "Handles CRUD operations for courses.")
-    Container(studentRepository, "StudentRepository", "Spring Bean", "Handles CRUD operations for student records.")
+    Container(courseRepository, "CourseRepository", "", "Handles CRUD operations for courses.")
+    Container(studentRepository, "StudentRepository", "", "Handles CRUD operations for student records.")
 
     ' Data Pipeline and Storage
-    Container(etlPipeline, "ETL Pipeline", "Python/Spark", "Extracts data from operational systems and loads it into the data warehouse.")
+    Container(etlPipeline, "ETL Pipeline", "", "Extracts data from operational systems and loads it into the data warehouse.")
     ContainerDb(academicDb, "Academic Records Database", "PostgreSQL", "Stores student records, course data, and enrollment history.")
     ContainerDb(dataWarehouse, "Data Warehouse", "PostgreSQL (OLAP)", "Stores historical and aggregated data for analytics and reporting.")
 }
@@ -47,17 +47,30 @@ Rel(studentController, studentService, "Handles student record-related requests"
 Rel(courseService, courseRepository, "Handles CRUD operations for courses", $tags="sync")
 Rel(studentService, studentRepository, "Handles CRUD operations for student records", $tags="sync")
 Rel(reportingService, dataWarehouse, "Generates reports from historical data", $tags="sync")
+
+Rel(academicDb, etlPipeline, "", $tags="sync")
 Rel(etlPipeline, academicDb, "Extracts data from operational systems", $tags="sync")
 Rel(etlPipeline, dataWarehouse, "Loads transformed data into the data warehouse", $tags="sync")
+Rel(dataWarehouse, etlPipeline, "Requests data transformations or updates", $tags="sync")
 
 ' External system interactions
-Rel(authService, authSyastem, "Authenticates users via SSO", $tags="sync")
+Rel(authService, authSystem, "Authenticates users via SSO", $tags="sync")
 Rel(backupService, backupSystem, "Backs up course and academic data", $tags="sync")
-Rel(reportingService, dataAnalytics, "Provides academic data for analysis", $tags="sync")
-Rel(dataAnalytics, reportingService, "Processes course and student data", $tags="sync")
+Rel(reportingService, dataAnalytics, "Sends academic data for analysis", $tags="sync")
+Rel(dataAnalytics, reportingService, "Returns insights and analysis for reporting", $tags="sync")
 
 ' Relationships with SIS
 Rel(courseService, SIS, "Syncs course data with SIS", $tags="sync")
 Rel(studentService, SIS, "Syncs student data with SIS", $tags="sync")
+
+' Notification Service relations
+
+Rel(notificationService, reportingService, "Notifies when reports are generated", $tags="sync")
+Rel(notificationService, studentService, "Sends notifications on academic record updates", $tags="sync")
+Rel(notificationService, courseService, "Sends notifications on course enrollment updates", $tags="sync")
+
+Rel(courseRepository, academicDb, "Reads/Writes course data", $tags="sync")
+Rel(studentRepository, academicDb, "Reads/Writes student data", $tags="sync")
+
 
 @enduml

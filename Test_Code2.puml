@@ -1,6 +1,6 @@
 @startuml UCMS_Code_Diagram
 
-title UCMS - Code Diagram (Classes & Relationships)
+title UCMS - Code Diagram (with Data Encryption, ETL, Backup, and Compliance)
 
 ' Define main entities and their attributes
 class Student {
@@ -8,6 +8,7 @@ class Student {
   + string FirstName
   + string LastName
   + EnrollInCourse(Course course)
+  + string EncryptedData <<encrypted>>
 }
 
 class Course {
@@ -30,6 +31,7 @@ class AcademicRecord {
   + int StudentID <<FK>> -- References Student.StudentID
   + int CourseID <<FK>> -- References Course.CourseID
   + string Grade
+  + string EncryptedData <<encrypted>>
 }
 
 class NotificationService {
@@ -45,6 +47,7 @@ class ReportingService {
 class BackupService {
   + BackupAcademicData()
   + RestoreAcademicData()
+  + MonitorDataIntegrity() <<automated failover>>
 }
 
 class CourseRepository {
@@ -68,16 +71,20 @@ class ETLPipeline {
 }
 
 class AcademicRecordsDatabase {
-  + StoreStudentRecord(Student student)
+  + StoreStudentRecord(Student student) <<encrypted>>
   + StoreCourseRecord(Course course)
   + StoreEnrollmentRecord(Enrollment enrollment)
-  + StoreAcademicRecord(AcademicRecord record)
-
+  + StoreAcademicRecord(AcademicRecord record) <<encrypted>>
 }
 
 class DataWarehouse {
   + StoreAggregatedData()
   + GenerateAnalytics()
+}
+
+class AdminInterface {
+  + ManageGrades()
+  + ManageEnrollment()
 }
 
 class RestAPI {
@@ -101,9 +108,13 @@ NotificationService --> Student : "notifies enrollment and performance"
 NotificationService --> AcademicRecord : "notifies grades"
 ReportingService --> Student : "generates performance reports"
 ReportingService --> Course : "generates enrollment reports"
+AcademicRecordsDatabase --> CourseRepository : "stores course data"
+AcademicRecordsDatabase --> StudentRepository : "stores student data"
+AcademicRecordsDatabase --> Enrollment : "stores enrollment data"
+AcademicRecordsDatabase --> AcademicRecord : "stores academic record"
 RestAPI --> Student : "exposes student data via REST API"
 RestAPI --> Course : "exposes course data via REST API"
 RestAPI --> AcademicRecord : "exposes academic record via REST API"
-
+AdminInterface --> AcademicRecordsDatabase : "manages academic data directly"
 
 @enduml
