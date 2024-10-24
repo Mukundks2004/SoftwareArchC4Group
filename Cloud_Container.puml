@@ -1,0 +1,40 @@
+@startuml
+set separator none
+title University Course Management System (UCMS) - Cloud Architecture with Backup and Database
+
+left to right direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Cloud Components Only
+System(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="Cloud Backup for academic and course data.", $tags="", $link="")
+System(AWSElasticBeanstalk, "AWS Elastic Beanstalk (PaaS)", $descr="Auto-scaling and deployment for UCMS services.", $tags="", $link="")
+System(AWSCloudWatch, "AWS CloudWatch", $descr="Cloud monitoring for backup and scaling.", $tags="", $link="")
+
+' Database Components
+ContainerDb(AcademicRecordsDatabase, "Academic Records Database", $descr="PostgreSQL", $techn="Stores student records, course data, and enrollment history.", $tags="", $link="")
+
+Container_Boundary("APIGateway_boundary", "API Gateway", $tags="") {
+  Component(BackupService, "BackupService", $techn="", $descr="Manages backups of academic records and course data. Provides automatic backup and disaster recovery via AWS S3 (DSaaS).", $tags="", $link="")
+  Component(CourseService, "CourseService", $techn="", $descr="Manages course enrollment, availability, and updates. Auto-scales using AWS Elastic Beanstalk.", $tags="", $link="")
+  Component(StudentService, "StudentService", $techn="", $descr="Manages student academic records and updates. Auto-scales using AWS Elastic Beanstalk.", $tags="", $link="")
+}
+
+' Relationships
+Rel(BackupService, AWSS3DSaaS, "Stores academic data backups", $techn="", $tags="", $link="")
+Rel(BackupService, AWSCloudWatch, "Monitors backup activities", $techn="", $tags="", $link="")
+Rel(CourseService, AWSElasticBeanstalk, "Auto-scales based on demand", $techn="", $tags="", $link="")
+Rel(StudentService, AWSElasticBeanstalk, "Auto-scales based on demand", $techn="", $tags="", $link="")
+Rel(CourseService, AWSCloudWatch, "Monitors scaling performance", $techn="", $tags="", $link="")
+Rel(StudentService, AWSCloudWatch, "Monitors scaling performance", $techn="", $tags="", $link="")
+
+' Database Relationships
+Rel(BackupService, AcademicRecordsDatabase, "Backs up data from the database", $techn="", $tags="", $link="")
+Rel(CourseService, AcademicRecordsDatabase, "Reads and writes course enrollment data", $techn="", $tags="", $link="")
+Rel(StudentService, AcademicRecordsDatabase, "Reads and writes student academic data", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

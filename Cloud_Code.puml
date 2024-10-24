@@ -1,0 +1,56 @@
+@startuml UCMS_Cloud_Architecture
+
+title UCMS - Cloud Architecture Overview (Abstracted)
+
+' Cloud Services and Databases
+class AWS_S3 {
+    + StoreAcademicBackup()
+    + RestoreBackup()
+}
+
+class AWS_ElasticBeanstalk {
+    + AutoScale()
+    + DeployApplication()
+}
+
+class AcademicRecordsDatabase {
+    + StoreStudentRecord()
+    + StoreCourseRecord()
+    + StoreEnrollmentRecord()
+    + StoreAcademicRecord()
+}
+
+class DataWarehouse {
+    + StoreAggregatedData()
+    + GenerateAnalytics()
+}
+
+class BackupService {
+    + BackupAcademicData()
+    + RestoreAcademicData()
+}
+
+class ReportingService {
+    + GenerateEnrollmentReport()
+    + GenerateStudentPerformanceReport()
+}
+
+class ETLPipeline {
+    + ExtractData()
+    + TransformData()
+    + LoadData()
+}
+
+' Cloud interactions and data pipelines
+BackupService --> AWS_S3 : "Backs up academic and course data"
+AcademicRecordsDatabase --> BackupService : "Academic records backed up to AWS S3"
+ReportingService --> DataWarehouse : "Generates reports from aggregated data"
+ETLPipeline --> DataWarehouse : "Loads transformed data into data warehouse"
+ETLPipeline --> AcademicRecordsDatabase : "Extracts data from database"
+
+' Cloud deployment scaling with AWS Elastic Beanstalk
+AWS_ElasticBeanstalk : "Auto-scales UCMS services"
+ReportingService --> AWS_ElasticBeanstalk : "Scales with AWS Elastic Beanstalk"
+BackupService --> AWS_ElasticBeanstalk : "Scales with AWS Elastic Beanstalk"
+
+@enduml

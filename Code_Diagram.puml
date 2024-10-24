@@ -1,0 +1,115 @@
+@startuml UCMS_Code_Diagram
+
+title UCMS - Code Diagram (with Cloud Architecture)
+
+' Core Entities
+class Student {
+    + int StudentID <<PK>>
+    + string FirstName
+    + string LastName
+    + EnrollInCourse(Course course)
+}
+
+class Course {
+    + int CourseID <<PK>>
+    + string CourseName
+    + string CourseCode
+    + int Credits
+    + ManageEnrollment(Enrollment enrollment)
+}
+
+class Enrollment {
+    + int EnrollmentID <<PK>>
+    + int StudentID <<FK>> -- References Student.StudentID
+    + int CourseID <<FK>> -- References Course.CourseID
+    + string EnrollmentStatus
+}
+
+class AcademicRecord {
+    + int RecordID <<PK>>
+    + int StudentID <<FK>> -- References Student.StudentID
+    + int CourseID <<FK>> -- References Course.CourseID
+    + string Grade
+}
+
+' Repositories for Data Management
+class CourseRepository {
+    + AddCourse(Course course)
+    + GetCourse(int courseID)
+    + UpdateCourse(Course course)
+    + RemoveCourse(int courseID)
+}
+
+class StudentRepository {
+    + AddStudent(Student student)
+    + GetStudent(int studentID)
+    + UpdateStudent(Student student)
+    + RemoveStudent(int studentID)
+}
+
+' Services interacting with Repositories and Cloud
+class NotificationService {
+    + SendEnrollmentSuccessNotification(Student student, Course course)
+    + SendGradeNotification(Student student, AcademicRecord record)
+}
+
+class ReportingService {
+    + GenerateEnrollmentReport()
+    + GenerateStudentPerformanceReport()
+}
+
+class BackupService {
+    + BackupAcademicData()
+    + RestoreAcademicData()
+}
+
+class ETLPipeline {
+    + ExtractData()
+    + TransformData()
+    + LoadData()
+}
+
+' Cloud Services and Databases
+class AcademicRecordsDatabase {
+    + StoreStudentRecord(Student student)
+    + StoreCourseRecord(Course course)
+    + StoreEnrollmentRecord(Enrollment enrollment)
+    + StoreAcademicRecord(AcademicRecord record)
+}
+
+class AWS_S3 {
+    + StoreAcademicBackup()
+    + RestoreBackup()
+}
+
+class AWS_ElasticBeanstalk {
+    + AutoScale()
+    + DeployApplication()
+}
+
+' Relationships between core entities
+Student "1" --> "*" Enrollment : "Enrolls in"
+Course "1" --> "*" Enrollment : "Is enrolled in"
+Student "1" --> "*" AcademicRecord : "Has"
+Course "1" --> "*" AcademicRecord : "Is recorded in"
+
+' Repositories connected to services
+CourseRepository "1" --> "*" Course : "Manages course data"
+StudentRepository "1" --> "*" Student : "Manages student data"
+
+' Cloud interactions and data pipelines
+BackupService --> AWS_S3 : "Backs up academic and course data"
+AcademicRecordsDatabase --> BackupService : "Academic records backed up to AWS S3"
+ReportingService --> AWS_S3 : "Generates reports from data"
+ETLPipeline --> AcademicRecordsDatabase : "Extracts data from database"
+ETLPipeline --> AWS_S3 : "Loads transformed data into AWS S3"
+AWS_ElasticBeanstalk --> CourseRepository : "Auto-scales based on load"
+AWS_ElasticBeanstalk --> StudentRepository : "Auto-scales based on load"
+
+' Notification interactions
+NotificationService --> Student : "Notifies enrollment success"
+NotificationService --> AcademicRecord : "Notifies grade updates"
+ReportingService --> Student : "Generates performance reports"
+ReportingService --> Course : "Generates enrollment reports"
+
+@enduml
