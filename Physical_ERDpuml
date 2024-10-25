@@ -1,0 +1,169 @@
+@startuml UCMS_PHYSICAL_ERD
+
+entity "User" as User {
+  * UserID : SERIAL [PK]
+  --
+  Username : VARCHAR(50)
+  PasswordHash : VARCHAR(256)
+  Email : VARCHAR(100)
+  UserType : VARCHAR(20)
+  LastLogin : TIMESTAMPTZ
+  AccountStatus : VARCHAR(20)
+}
+
+entity "Student" as Student {
+  * StudentID : SERIAL [PK], FK to User
+  --
+  DateOfBirth : DATE
+  PhoneNumber : VARCHAR(20)
+  Address : TEXT
+  EnrollmentDate : DATE
+  Status : VARCHAR(20)
+}
+
+entity "Faculty" as Faculty {
+  * FacultyID : SERIAL [PK], FK to User
+  --
+  FirstName : VARCHAR(50)
+  LastName : VARCHAR(50)
+  PhoneNumber : VARCHAR(20)
+  DepartmentID : INTEGER [FK]
+  Title : VARCHAR(50)
+}
+
+entity "Administrator" as Administrator {
+  * AdminID : SERIAL [PK], FK to User
+  --
+  FirstName : VARCHAR(50)
+  LastName : VARCHAR(50)
+  PhoneNumber : VARCHAR(20)
+}
+
+entity "Department" as Department {
+  * DepartmentID : SERIAL [PK]
+  --
+  DepartmentName : VARCHAR(100)
+  DepartmentCode : VARCHAR(20)
+}
+
+entity "Course" as Course {
+  * CourseID : SERIAL [PK]
+  --
+  CourseName : VARCHAR(100)
+  CourseCode : VARCHAR(20)
+  Description : TEXT
+  Credits : INTEGER
+  DepartmentID : INTEGER [FK]
+  PrerequisiteCourseID : INTEGER [FK]
+}
+
+entity "Enrollment" as Enrollment {
+  * EnrollmentID : SERIAL [PK]
+  --
+  StudentID : INTEGER [FK]
+  CourseID : INTEGER [FK]
+  SectionID : INTEGER [FK]
+  EnrollmentDate : DATE
+  Status : VARCHAR(20)
+}
+
+entity "Section" as Section {
+  * SectionID : SERIAL [PK]
+  --
+  CourseID : INTEGER [FK]
+  FacultyID : INTEGER [FK]
+  Semester : VARCHAR(10)
+  Year : INTEGER
+  Schedule : VARCHAR(50)
+  Location : VARCHAR(100)
+}
+
+entity "AcademicRecord" as AcademicRecord {
+  * RecordID : SERIAL [PK]
+  --
+  StudentID : INTEGER [FK]
+  EnrollmentID : INTEGER [FK]
+  Grade : VARCHAR(2)
+}
+
+entity "HECS" as HECS {
+  * HECSID : SERIAL [PK]
+  --
+  StudentID : INTEGER [FK]
+  LoanAmount : NUMERIC(15,2)
+  Balance : NUMERIC(15,2)
+  InterestRate : NUMERIC(5,3)
+  RepaymentStatus : VARCHAR(20)
+}
+
+entity "Reports" as Reports {
+  * ReportID : SERIAL [PK]
+  --
+  ReportName : VARCHAR(100)
+  ReportType : VARCHAR(50)
+  GeneratedDate : DATE
+  Parameters : TEXT
+}
+
+entity "Payment" as Payment {
+  * PaymentID : SERIAL [PK]
+  --
+  StudentID : INTEGER [FK]
+  Amount : NUMERIC(10,2)
+  PaymentDate : DATE
+  PaymentMethod : VARCHAR(20)
+  Status : VARCHAR(20)
+}
+
+entity "SystemLog" as SystemLog {
+  * LogID : SERIAL [PK]
+  --
+  Timestamp : TIMESTAMPTZ
+  UserID : INTEGER [FK]
+  Action : VARCHAR(100)
+  Description : TEXT
+  Status : VARCHAR(20)
+}
+
+
+' Define relationships with cardinality
+
+' User ↔ Student, Faculty, Administrator
+User ||--|| Student : "is a"
+User ||--|| Faculty : "is a"
+User ||--|| Administrator : "is a"
+
+' Student ↔ Enrollment
+Student ||--o{ Enrollment : "enrolls in"
+
+' Course ↔ Enrollment
+Course ||--o{ Enrollment : "has"
+
+' Course ↔ Section
+Course ||--o{ Section : "has"
+
+' Faculty ↔ Section
+Faculty ||--o{ Section : "teaches"
+
+' Department ↔ Faculty
+Department ||--o{ Faculty : "has"
+
+' Department ↔ Course
+Department ||--o{ Course : "offers"
+
+' Enrollment ↔ AcademicRecord
+Enrollment ||--|| AcademicRecord : "has"
+
+' Student ↔ HECS
+Student ||--o{ HECS : "has"
+
+' Administrator ↔ Reports
+Administrator ||--o{ Reports : "creates"
+
+' Student ↔ Payment
+Student ||--o{ Payment : "makes"
+
+' SystemLog ↔ User
+User ||--o{ SystemLog : "performs"
+
+@enduml
