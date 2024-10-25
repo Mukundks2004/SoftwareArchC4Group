@@ -1,0 +1,47 @@
+@startuml UCMS_Conceptual_ERD
+
+entity "User" as User
+
+entity "Student" as Student
+
+entity "Faculty" as Faculty
+
+entity "Administrator" as Administrator
+
+entity "Department" as Department
+
+entity "Course" as Course
+
+entity "Enrollment" as Enrollment
+
+entity "Section" as Section
+
+entity "AcademicRecord" as AcademicRecord
+
+entity "HECS" as HECS
+
+entity "Reports" as Reports
+
+entity "Payment" as Payment
+
+entity "SystemLog" as SystemLog
+
+' Define relationships
+
+User ||--|| Student : "is a"
+User ||--|| Faculty : "is a"
+User ||--|| Administrator : "is a"
+
+Student ||--o{ Enrollment : "enrolls in"
+Course ||--o{ Enrollment : "has"
+Course ||--o{ Section : "has"
+Faculty ||--o{ Section : "teaches"
+Department ||--o{ Faculty : "has"
+Department ||--o{ Course : "offers"
+Enrollment ||--|| AcademicRecord : "results in"
+Student ||--o{ HECS : "has"
+Administrator ||--o{ Reports : "creates"
+Student ||--o{ Payment : "makes"
+User ||--o{ SystemLog : "performs"
+
+@enduml
