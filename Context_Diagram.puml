@@ -1,31 +1,36 @@
-@startuml
-set separator none
-title University Course Management System (UCMS) - System Context
+@startuml UCMS_Context_Diagram
+!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-left to right direction
+TITLE University Course Management System (UCMS) - System Context
 
-!include https://raw.githubusercontent.com/kirchsth/C4-PlantUML/extended/C4_Container.puml
+AddRelTag("async", $textColor="grey", $lineColor="grey", $lineStyle = DashedLine())
 
-AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
+Person(Student, "Student", "Enroll in courses and view academic records.", $type="Person")
+Person(Faculty, "Faculty", "Manage course offerings and track student enrollments.", $type="Person")
+Person(Administrator, "Administrator", "Manage data and generate reports.", $type="Person")
+Person(ITDepartment, "IT Department", "Manage system backups, integration, and security.", $type="Person")
 
-Person(Student, "Student", $descr="Enroll in courses and view academic records.", $tags="", $link="")
-System(StudentInformationSystemSIS, "Student Information System (SIS)", $descr="Manages student and course data.", $tags="", $link="")
-System(AuthenticationSystem, "Authentication System", $descr="Handles Single Sign-On (SSO) for user authentication.", $tags="", $link="")
-System(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="Provides cloud-based backup and recovery using AWS S3.", $tags="", $link="")
-Person(Faculty, "Faculty", $descr="Manage course offerings and track student enrollments.", $tags="", $link="")
-System(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.", $tags="", $link="")
-Person(Administrator, "Administrator", $descr="Manage data and generate reports.", $tags="", $link="")
-Person(ITDepartment, "IT Department", $descr="Manage system backups, integration, and security.", $tags="", $link="")
-System(UCMS, "University Course Management System (UCMS)", $descr="Handles course enrollments, academic records, and data reporting.", $tags="", $link="")
+System(UCMS, "University Course Management System (UCMS)", "Handles course enrollments, academic records, and data reporting.", $type="Software System")
 
-Rel(Student, UCMS, "Enroll in courses and view records", $techn="HTTPS", $tags="", $link="")
-Rel(Faculty, UCMS, "Manage courses and view student performance", $techn="HTTPS", $tags="", $link="")
-Rel(Administrator, UCMS, "Generate reports and manage courses", $techn="HTTPS", $tags="", $link="")
-Rel(ITDepartment, UCMS, "Monitor system backups and integrations", $techn="", $tags="", $link="")
-Rel(UCMS, StudentInformationSystemSIS, "Syncs student/course data", $techn="", $tags="", $link="")
-Rel(UCMS, AuthenticationSystem, "Handles user authentication via OAuth 2.0", $techn="", $tags="sync", $link="")
-Rel(UCMS, AWSS3DSaaS, "Backs up academic data to AWS S3", $techn="", $tags="sync", $link="")
-Rel(UCMS, DataAnalyticsSystem, "Provides data for reporting and insights", $techn="", $tags="sync", $link="")
+System_Ext(SIS, "Student Information System (SIS)", "Manages student and course data.", $type="Software System")
+System_Ext(AuthSys, "Authentication System", "Handles Single Sign-On (SSO) for user authentication.", $type="Software System")
+System_Ext(AWSS3, "AWS S3 (DSaaS)", "Provides cloud-based backup and recovery.", $type="Software System")
+System_Ext(DataAnalytics, "Data Analytics System", "Processes and analyzes academic data for insights and reporting.", $type="Software System")
+System_Ext(HECS, "HECS Debt System", "Manages student loans and debts." , $type="Software System")
 
-LAYOUT_WITH_LEGEND()
+Rel(Student, UCMS, "Enrolls in courses and views records", "HTTPS")
+Rel(Faculty, UCMS, "Manages courses and views student performance", "HTTPS")
+Rel(Administrator, UCMS, "Manages data and generates reports", "HTTPS")
+Rel(ITDepartment, UCMS, "Monitors system backups and integrations")
+
+Rel(UCMS, AuthSys, "Authenticates users via OAuth 2.0", "OAuth 2.0")
+Rel(UCMS, SIS, "Syncs student/course data", "Secure API")
+
+Rel(UCMS, AWSS3, "Backs up data to AWS S3", "S3 API", $tags="async")
+Rel(UCMS, DataAnalytics, "Provides data for analytics and reporting", "ETL Processes", $tags="async")
+Rel(UCMS, HECS, "Integrates with HECS for student loans", "Secure API", $tags="async")
+
+SHOW_LEGEND(true)
+
 @enduml
