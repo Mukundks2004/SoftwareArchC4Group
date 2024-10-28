@@ -1,0 +1,170 @@
+@startuml UCMS_ERD
+
+' Define entity types
+entity "User" as User {
+  * UserID : PK
+  --
+  Username
+  PasswordHash
+  Email
+  UserType
+  LastLogin
+  AccountStatus
+}
+
+entity "Student" as Student {
+  * StudentID : PK, FK to User
+  --
+  DateOfBirth
+  PhoneNumber
+  Address
+  EnrollmentDate
+  Status
+}
+
+entity "Faculty" as Faculty {
+  * FacultyID : PK, FK to User
+  --
+  FirstName
+  LastName
+  PhoneNumber
+  DepartmentID : FK
+  Title
+}
+
+entity "Administrator" as Administrator {
+  * AdminID : PK, FK to User
+  --
+  FirstName
+  LastName
+  PhoneNumber
+}
+
+entity "Department" as Department {
+  * DepartmentID : PK
+  --
+  DepartmentName
+  DepartmentCode
+}
+
+entity "Course" as Course {
+  * CourseID : PK
+  --
+  CourseName
+  CourseCode
+  Description
+  Credits
+  DepartmentID : FK
+  PrerequisiteCourseID : FK
+}
+
+entity "Enrollment" as Enrollment {
+  * EnrollmentID : PK
+  --
+  StudentID : FK
+  CourseID : FK
+  SectionID : FK
+  EnrollmentDate
+  Status
+}
+
+entity "Section" as Section {
+  * SectionID : PK
+  --
+  CourseID : FK
+  FacultyID : FK
+  Semester
+  Year
+  Schedule
+  Location
+}
+
+entity "AcademicRecord" as AcademicRecord {
+  * RecordID : PK
+  --
+  StudentID : FK
+  EnrollmentID : FK
+  Grade
+}
+
+entity "HECS" as HECS {
+  * HECSID : PK
+  --
+  StudentID : FK
+  LoanAmount
+  Balance
+  InterestRate
+  RepaymentStatus
+}
+
+entity "Reports" as Reports {
+  * ReportID : PK
+  --
+  ReportName
+  ReportType
+  GeneratedDate
+  Parameters
+}
+
+entity "Payment" as Payment {
+  * PaymentID : PK
+  --
+  StudentID : FK
+  Amount
+  PaymentDate
+  PaymentMethod
+  Status
+}
+
+entity "SystemLog" as SystemLog {
+  * LogID : PK
+  --
+  Timestamp
+  UserID : FK
+  Action
+  Description
+  Status
+}
+
+
+' Define relationships with cardinality
+
+' User ↔ Student, Faculty, Administrator
+User ||--|| Student : "is a"
+User ||--|| Faculty : "is a"
+User ||--|| Administrator : "is a"
+
+' Student ↔ Enrollment
+Student ||--o{ Enrollment : "enrolls in"
+
+' Course ↔ Enrollment
+Course ||--o{ Enrollment : "has"
+
+' Course ↔ Section
+Course ||--o{ Section : "has"
+
+' Faculty ↔ Section
+Faculty ||--o{ Section : "teaches"
+
+' Department ↔ Faculty
+Department ||--o{ Faculty : "has"
+
+' Department ↔ Course
+Department ||--o{ Course : "offers"
+
+' Enrollment ↔ AcademicRecord
+Enrollment ||--|| AcademicRecord : "has"
+
+' Student ↔ HECS
+Student ||--o{ HECS : "has"
+
+' Administrator ↔ Reports
+Administrator ||--o{ Reports : "creates"
+
+' Student ↔ Payment
+Student ||--o{ Payment : "makes"
+
+' SystemLog ↔ User
+User ||--o{ SystemLog : "performs"
+
+@enduml
