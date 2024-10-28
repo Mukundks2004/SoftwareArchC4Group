@@ -1,5 +1,7 @@
 @startuml UCMS_ERD
 
+title University Course Management System (UCMS) - Logical ERD
+
 ' Define entity types
 entity "User" as User {
   * UserID : PK
@@ -153,7 +155,7 @@ Department ||--o{ Faculty : "has"
 Department ||--o{ Course : "offers"
 
 ' Enrollment ↔ AcademicRecord
-Enrollment ||--|| AcademicRecord : "has"
+Enrollment ||--|| AcademicRecord : "results in"
 
 ' Student ↔ HECS
 Student ||--o{ HECS : "has"
