@@ -7,29 +7,29 @@ TITLE University Course Management System (UCMS) - System Context
 AddRelTag("async", $textColor="grey", $lineColor="grey", $lineStyle = DashedLine())
 
 Person(Student, "Student", "Enroll in courses and view academic records.", $type="Person")
-Person(Faculty, "Faculty", "Manage course offerings and track student enrollments.", $type="Person")
-Person(Administrator, "Administrator", "Manage data and generate reports.", $type="Person")
-Person(ITDepartment, "IT Department", "Manage system backups, integration, and security.", $type="Person")
+Person(Faculty, "Faculty", "Manage course offerings, track student enrollments and view students' performance.", $type="Person")
+Person(Administrator, "Administrator", "Unenroll students, bypass restrictions on behalf of students/faculty", $type="Person")
+Person(ITDepartment, "IT Department", "Manage system backups, integrations and security.", $type="Person")
 
 System(UCMS, "University Course Management System (UCMS)", "Handles course enrollments, academic records, and data reporting.", $type="Software System")
 
-System_Ext(SIS, "Student Information System (SIS)", "Manages student and course data.", $type="Software System")
+System_Ext(SIS, "Student and Course Information System (SIS)", "Returns student and course data.", $type="Software System")
 System_Ext(AuthSys, "Authentication System", "Handles Single Sign-On (SSO) for user authentication.", $type="Software System")
 System_Ext(AWSS3, "AWS S3 (DSaaS)", "Provides cloud-based backup and recovery.", $type="Software System")
 System_Ext(DataAnalytics, "Data Analytics System", "Processes and analyzes academic data for insights and reporting.", $type="Software System")
-System_Ext(HECS, "HECS Debt System", "Manages student loans and debts." , $type="Software System")
+System_Ext(HECS, "HECS Debt System", "Returns data regarding student loans and debts." , $type="Software System")
 
-Rel(Student, UCMS, "Enrolls in courses and views records", "HTTPS")
-Rel(Faculty, UCMS, "Manages courses and views student performance", "HTTPS")
-Rel(Administrator, UCMS, "Manages data and generates reports", "HTTPS")
-Rel(ITDepartment, UCMS, "Monitors system backups and integrations")
+Rel(Student, UCMS, "Enrolls in courses and views personal academic records and analytics", "HTTPS")
+Rel(Faculty, UCMS, "Manages courses, tracks student enrollments and views student performances", "HTTPS")
+Rel(Administrator, UCMS, "Unenrolls students, bypass course prerequisites", "HTTPS")
+Rel(ITDepartment, UCMS, "Monitors system backups, integrations and security", "HTTPS")
 
 Rel(UCMS, AuthSys, "Authenticates users via OAuth 2.0", "OAuth 2.0")
-Rel(UCMS, SIS, "Syncs student/course data", "Secure API")
+Rel(UCMS, SIS, "Retrieves immutable student/course data", "Secure API")
 
 Rel(UCMS, AWSS3, "Backs up data to AWS S3", "S3 API", $tags="async")
-Rel(UCMS, DataAnalytics, "Provides data for analytics and reporting", "ETL Processes", $tags="async")
-Rel(UCMS, HECS, "Integrates with HECS for student loans", "Secure API", $tags="async")
+BiRel(UCMS, DataAnalytics, "Retrieves analytics", "GraphQL", $tags="async")
+Rel(UCMS, HECS, "Retrieves HECS loan data", "Secure API", $tags="async")
 
 SHOW_LEGEND(true)
 
