@@ -4,8 +4,9 @@ title University Course Management System (UCMS) - System Context
 
 left to right direction
 
-!include <C4/C4>
-!include <C4/C4_Context>
+!include https://raw.githubusercontent.com/kirchsth/C4-PlantUML/extended/C4_Container.puml
+
+AddRelTag("sync", $textColor="black", $lineColor="black", $lineStyle = DashedLine())
 
 Person(Student, "Student", $descr="Enroll in courses and view academic records.", $tags="", $link="")
 System(StudentInformationSystemSIS, "Student Information System (SIS)", $descr="Manages student and course data.", $tags="", $link="")
@@ -13,7 +14,6 @@ System(AuthenticationSystem, "Authentication System", $descr="Handles Single Sig
 System(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="Provides cloud-based backup and recovery using AWS S3.", $tags="", $link="")
 Person(Faculty, "Faculty", $descr="Manage course offerings and track student enrollments.", $tags="", $link="")
 System(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.", $tags="", $link="")
-System(AWSElasticBeanstalkPaaS, "AWS Elastic Beanstalk (PaaS)", $descr="Scalable platform hosting UCMS services, enabling auto-scaling during peak enrollment periods.", $tags="", $link="")
 Person(Administrator, "Administrator", $descr="Manage data and generate reports.", $tags="", $link="")
 Person(ITDepartment, "IT Department", $descr="Manage system backups, integration, and security.", $tags="", $link="")
 System(UCMS, "University Course Management System (UCMS)", $descr="Handles course enrollments, academic records, and data reporting.", $tags="", $link="")
@@ -23,10 +23,9 @@ Rel(Faculty, UCMS, "Manage courses and view student performance", $techn="HTTPS"
 Rel(Administrator, UCMS, "Generate reports and manage courses", $techn="HTTPS", $tags="", $link="")
 Rel(ITDepartment, UCMS, "Monitor system backups and integrations", $techn="", $tags="", $link="")
 Rel(UCMS, StudentInformationSystemSIS, "Syncs student/course data", $techn="", $tags="", $link="")
-Rel(UCMS, AuthenticationSystem, "Handles user authentication via OAuth 2.0", $techn="", $tags="", $link="")
-Rel(UCMS, AWSS3DSaaS, "Backs up academic data to AWS S3", $techn="", $tags="", $link="")
-Rel(UCMS, DataAnalyticsSystem, "Provides data for reporting and insights", $techn="", $tags="", $link="")
-Rel(UCMS, AWSElasticBeanstalkPaaS, "Auto-scales resources with AWS Elastic Beanstalk", $techn="", $tags="", $link="")
+Rel(UCMS, AuthenticationSystem, "Handles user authentication via OAuth 2.0", $techn="", $tags="sync", $link="")
+Rel(UCMS, AWSS3DSaaS, "Backs up academic data to AWS S3", $techn="", $tags="sync", $link="")
+Rel(UCMS, DataAnalyticsSystem, "Provides data for reporting and insights", $techn="", $tags="sync", $link="")
 
-SHOW_LEGEND(true)
+LAYOUT_WITH_LEGEND()
 @enduml
