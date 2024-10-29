@@ -12,11 +12,6 @@ Person(Student, "Student", $descr="Enroll in courses and view academic records."
 Person(Faculty, "Faculty", $descr="Manage course offerings and track student enrollments.", $tags="", $link="")
 Person(Administrator, "Administrator", $descr="Manage data and generate reports.", $tags="", $link="")
 Person(ITDepartment, "IT Department", $descr="Manage system backups, integration, and security.", $tags="", $link="")
-System(StudentInformationSystemSIS, "Student Information System (SIS)", $descr="Manages student and course data.", $tags="", $link="")
-System(AuthenticationSystem, "Authentication System", $descr="Handles Single Sign-On (SSO) for user authentication.", $tags="", $link="")
-System(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="Provides cloud-based backup and recovery using AWS S3.", $tags="", $link="")
-System(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.", $tags="", $link="")
-System(AWSElasticBeanstalkPaaS, "AWS Elastic Beanstalk (PaaS)", $descr="Scalable platform hosting UCMS services, enabling auto-scaling during peak enrollment periods.", $tags="", $link="")
 
 System_Boundary("UniversityCourseManagementSystemUCMS_boundary", "University Course Management System (UCMS)", $tags="") {
   Container(ReportingService, "Reporting Service", $techn="Generates academic performance and enrollment reports.", $descr="ASP.NET Core", $tags="", $link="")
@@ -32,14 +27,36 @@ System_Boundary("UniversityCourseManagementSystemUCMS_boundary", "University Cou
   Container(StudentRecordService, "Student Record Service", $techn="Handles student academic records.", $descr="ASP.NET Core", $tags="", $link="")
 }
 
+System_Ext(SIS, "Student Information System (SIS)", $descr="Manages student and course data.", $tags="", $link="")
+System_Ext(AuthSys, "Authentication System", $descr="Handles Single Sign-On (SSO) for user authentication.", $tags="", $link="")
+System_Ext(AWSS3, "AWS S3 (DSaaS)", $descr="Provides cloud-based backup and recovery using AWS S3.", $tags="", $link="")
+System_Ext(DataAnalytics, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.", $tags="", $link="")
+System_Ext(AWSElasticBeanstalkPaaS, "AWS Elastic Beanstalk (PaaS)", $descr="Scalable platform hosting UCMS services, enabling auto-scaling during peak enrollment periods.", $tags="", $link="")
+System_Ext(HECS, "HECS Debt System", "Manages student loans and debts." , $type="Software System")
+
+
 Rel(Student, WebApplication, "Enroll in courses and view records", $techn="HTTPS", $tags="", $link="")
 Rel(Faculty, WebApplication, "Manage courses and view student performance", $techn="HTTPS", $tags="", $link="")
 Rel(Administrator, WebApplication, "Generate reports and manage courses", $techn="HTTPS", $tags="", $link="")
 Rel(ITDepartment, APIGateway, "Monitor system backups and integrations", $techn="", $tags="", $link="")
-Rel(APIGateway, StudentInformationSystemSIS, "Syncs student/course data", $techn="", $tags="", $link="")
-Rel(APIGateway, AuthenticationSystem, "Handles user authentication via OAuth 2.0", $techn="", $tags="", $link="")
-Rel(BackupService, AWSS3DSaaS, "Backs up academic data to AWS S3", $techn="", $tags="", $link="")
-Rel(ReportingService, DataAnalyticsSystem, "Provides data for reporting and insights", $techn="", $tags="", $link="")
+
+' api gateway relationships
+Rel(APIGateway, SIS, "Syncs student/course data", $techn="", $tags="", $link="")
+Rel(APIGateway, AuthSys, "Handles user authentication via OAuth 2.0", $techn="", $tags="", $link="")
+
+'  auth service relationships
+Rel(WebApplication, AuthenticationService, "Manages login and session validation", $techn="OAuth 2.0", $tags="", $link="")
+Rel(AuthenticationService, APIGateway, "Validates tokens and permissions", $techn="OAuth 2.0", $tags="", $link="")
+Rel(AuthenticationService, AuthSys, "Authentication with SSO", $techn="OAuth 2.0", $tags="", $link="")
+
+Rel(APIGateway, HECS, "Routes requests for loan and debt data")
+
+' suggested HECS relationships:
+' Rel(CourseEnrollmentService, HECS, "Checks loan eligibility and updates enrollment-related debts")
+' Rel(StudentRecordService, HECS, "Fetches and displays loan and debt information")
+' Rel(ReportingService, HECS, "Aggregates data on loan statuses for institutional reporting")
+
+Rel(ReportingService, DataAnalytics, "Provides data for reporting and insights", $techn="", $tags="", $link="")
 Rel(APIGateway, AWSElasticBeanstalkPaaS, "Auto-scales resources with AWS Elastic Beanstalk", $techn="", $tags="", $link="")
 Rel(WebApplication, APIGateway, "Routes requests", $techn="", $tags="", $link="")
 Rel(APIGateway, CourseEnrollmentService, "Handles course enrollment requests", $techn="", $tags="", $link="")
@@ -49,6 +66,8 @@ Rel(CourseEnrollmentService, StudentRecordService, "Updates student records afte
 Rel(CourseEnrollmentService, NotificationService, "Sends enrollment notifications", $techn="", $tags="", $link="")
 Rel(ReportingService, DataWarehouse, "Queries for analytics and reports", $techn="", $tags="", $link="")
 Rel(ETLPipeline, DataWarehouse, "Loads transformed data", $techn="", $tags="", $link="")
+
+' Bi-Directional Relationships
 Rel(AcademicRecordsDatabase, ETLPipeline, "Provides operational data", $techn="", $tags="", $link="")
 Rel(ETLPipeline, AcademicRecordsDatabase, "Loads processed data", $techn="", $tags="", $link="")
 Rel(StudentRecordService, AcademicRecordsDatabase, "Reads and writes student records", $techn="", $tags="", $link="")
@@ -59,7 +78,9 @@ Rel(ReportingService, AcademicRecordsDatabase, "Queries for data", $techn="", $t
 Rel(AcademicRecordsDatabase, ReportingService, "Provides data for reporting", $techn="", $tags="", $link="")
 Rel(ReportingService, DataWarehouse, "Queries for data", $techn="", $tags="", $link="")
 Rel(DataWarehouse, ReportingService, "Provides aggregated data for reporting", $techn="", $tags="", $link="")
+
 Rel(BackupService, AcademicRecordsDatabase, "Backs up data to AWS S3", $techn="", $tags="", $link="")
+Rel(BackupService, AWSS3, "Backs up academic data to AWS S3", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 @enduml
