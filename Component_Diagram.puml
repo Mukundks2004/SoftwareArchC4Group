@@ -9,39 +9,43 @@ left to right direction
 !include <C4/C4_Container>
 !include <C4/C4_Component>
 
-Container(CourseRepository, "CourseRepository", $techn="Handles CRUD operations for courses.", $descr="", $tags="", $link="")
-Container(StudentRepository, "StudentRepository", $techn="Handles CRUD operations for student records.", $descr="", $tags="", $link="")
-ContainerDb(DataWarehouse, "Data Warehouse", $techn="Stores historical and aggregated data for analytics and reporting.", $descr="PostgreSQL (OLAP)", $tags="", $link="")
-System(StudentInformationSystemSIS, "Student Information System (SIS)", $descr="External System", $tags="", $link="")
-System(UniversitySSO, "University SSO", $descr="External Authentication System", $tags="", $link="")
-System(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="External Backup System", $tags="", $link="")
-System(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.", $tags="", $link="")
+System_Ext(SIS, "Student Information System (SIS)", $descr="External System for managing student and course data.")
+System_Ext(UniversitySSO, "University SSO", $descr="External Authentication System for SSO.")
+System_Ext(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="External Backup System for cloud-based data recovery.")
+System_Ext(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.")
+System_Ext(HECS, "HECS Debt System", "Manages student loans and debts.")
+
+ContainerDb(DataWarehouse, "Data Warehouse", $techn="PostgreSQL (OLAP)", $descr="Stores historical and aggregated data for analytics and reporting.")
 
 Container_Boundary("APIGateway_boundary", "API Gateway", $tags="") {
-  Component(BackupService, "BackupService", $techn="", $descr="Manages backups of academic records and course data. Provides automatic backup and disaster recovery via AWS S3 (DSaaS).", $tags="", $link="")
-  Component(CourseController, "CourseController", $techn="", $descr="Handles course enrollment and management requests.", $tags="", $link="")
-  Component(StudentController, "StudentController", $techn="", $descr="Handles student-related requests, including academic records.", $tags="", $link="")
-  Component(CourseService, "CourseService", $techn="", $descr="Manages course enrollment, availability, and updates. Auto-scales using AWS Elastic Beanstalk.", $tags="", $link="")
-  Component(StudentService, "StudentService", $techn="", $descr="Manages student academic records and updates.", $tags="", $link="")
-  Component(ReportingService, "ReportingService", $techn="", $descr="Generates academic and enrollment reports, sends data for analysis. Integrated with Data Analytics.", $tags="", $link="")
-  Component(AuthService, "AuthService", $techn="", $descr="Handles authentication and access control using OAuth 2.0. Securely authenticates users via University SSO.", $tags="", $link="")
-  Component(NotificationService, "NotificationService", $techn="", $descr="Sends event-based notifications, like enrollment success.", $tags="", $link="")
+  Component(BackupService, "BackupService", $techn="", $descr="Manages backups of academic records and course data. Provides disaster recovery via AWS S3 (DSaaS).")
+  Component(CourseController, "CourseController", $techn="", $descr="Handles course enrollment and management requests.")
+  Component(StudentController, "StudentController", $techn="", $descr="Handles student-related requests, including academic records.")
+  Component(CourseService, "CourseService", $techn="", $descr="Manages course enrollment, availability, and updates. Auto-scales using AWS Elastic Beanstalk.")
+  Component(StudentService, "StudentService", $techn="", $descr="Manages student academic records and updates.")
+  Component(ReportingService, "ReportingService", $techn="", $descr="Generates academic and enrollment reports, sends data for analysis.")
+  Component(AuthService, "AuthService", $techn="", $descr="Handles authentication and access control using OAuth 2.0. Authenticates users via University SSO.")
+  Component(NotificationService, "NotificationService", $techn="", $descr="Sends notifications, such as enrollment success or academic updates.")
 }
 
-Rel(CourseController, CourseService, "Handles course-related requests", $techn="", $tags="", $link="")
-Rel(StudentController, StudentService, "Handles student record-related requests", $techn="", $tags="", $link="")
-Rel(CourseService, CourseRepository, "Handles CRUD operations for courses", $techn="", $tags="", $link="")
-Rel(StudentService, StudentRepository, "Handles CRUD operations for student records", $techn="", $tags="", $link="")
-Rel(ReportingService, DataWarehouse, "Generates reports from historical data", $techn="", $tags="", $link="")
-Rel(AuthService, UniversitySSO, "Authenticates users via SSO (OAuth 2.0)", $techn="", $tags="", $link="")
-Rel(BackupService, AWSS3DSaaS, "Backs up course and academic data (AWS S3)", $techn="", $tags="", $link="")
-Rel(ReportingService, DataAnalyticsSystem, "Sends academic data for analysis", $techn="", $tags="", $link="")
-Rel(DataAnalyticsSystem, ReportingService, "Returns insights and analysis for reporting", $techn="", $tags="", $link="")
-Rel(CourseService, StudentInformationSystemSIS, "Syncs course data with SIS", $techn="", $tags="", $link="")
-Rel(StudentService, StudentInformationSystemSIS, "Syncs student data with SIS", $techn="", $tags="", $link="")
-Rel(NotificationService, ReportingService, "Notifies when reports are generated", $techn="", $tags="", $link="")
-Rel(NotificationService, StudentService, "Sends notifications on academic record updates", $techn="", $tags="", $link="")
-Rel(NotificationService, CourseService, "Sends notifications on course enrollment updates", $techn="", $tags="", $link="")
+' Component Relationships
+Rel(CourseController, CourseService, "Handles course-related requests")
+Rel(StudentController, StudentService, "Handles student record-related requests")
+Rel(CourseService, HECS, "Checks loan eligibility and updates enrollment-related debts")
+Rel(StudentService, HECS, "Fetches and displays loan and debt information")
+Rel(ReportingService, HECS, "Aggregates data on loan statuses for institutional reporting")
+Rel(BackupService, AWSS3DSaaS, "Backs up course and academic data (AWS S3)")
+Rel(ReportingService, DataAnalyticsSystem, "Sends academic data for analysis")
+Rel(DataAnalyticsSystem, ReportingService, "Returns insights and analysis for reporting")
+Rel(CourseService, SIS, "Syncs course data with SIS")
+Rel(StudentService, SIS, "Syncs student data with SIS")
+Rel(AuthService, UniversitySSO, "Authenticates users via SSO (OAuth 2.0)")
+Rel(ReportingService, DataWarehouse, "Generates reports from historical data")
+
+' Internal Relationships within the UCMS System
+Rel(NotificationService, ReportingService, "Notifies when reports are generated")
+Rel(NotificationService, StudentService, "Sends notifications on academic record updates")
+Rel(NotificationService, CourseService, "Sends notifications on course enrollment updates")
 
 SHOW_LEGEND(true)
 @enduml
