@@ -21,6 +21,7 @@ together {
 }
 
 System_Boundary(UCMS_Boundary, "University Course Management System (UCMS)") {
+  Container(PredictiveModel, "Predictive Model", $techn="Uses ML to analyze and recommend.", $descr="Python w TensorFlow", $tags="", $link="")
   
   Container_Boundary(WebAppBoundary, "Web Application", "Vue.js") {
     Component(WebFrontend, "Web Frontend", "Vue.js", "User interface for accessing UCMS services")
@@ -33,6 +34,16 @@ System_Boundary(UCMS_Boundary, "University Course Management System (UCMS)") {
     Component(SSOHandler, "SSO Handler", "OAuth 2.0", "Manages Single Sign-On (SSO) integration with AuthSys")
     Component(TokenManager, "Token Manager", "C#", "Generates and validates access tokens for secure API access")
     Component(RBACManager, "RBAC Manager", "C#", "Enforces Role-Based Access Control for data access permissions")
+  }
+
+  Container_Boundary(RecommendationBoundary, "Recommendation Service", "Node.js") {
+    Component(RecommendationEnginer, "Recommendation Engine", "Node.js", "Implements the core logic for generating recommendations based on ML data")
+    Component(RecommendationApiHandler, "Api Handler", "Express.js", "Manages incoming  requests from the Gateway and processes them")
+    Component(RecommentationDataAccessLayer, "Data Access Layer", "Axios", "Handles all interactions with the Model")
+  }
+
+  Container_Boundary(MlBoundary, "Predictive Model", "Python") {
+    Component(PredictiveModel, "Predictive Model", "Python w TensorFlow", "Machine Learning Model")
   }
   
   Container_Boundary(CourseEnrollmentBoundary, "Course Enrollment Service", "ASP.NET Core") {
@@ -55,6 +66,7 @@ System_Boundary(UCMS_Boundary, "University Course Management System (UCMS)") {
 
   Container_Boundary(API_Gateway_Boundary, "API Gateway", "ASP.NET Core") {
     Component(CourseController, "Course Controller", "ASP.NET Core", "Handles course enrollment and management requests")
+    Component(RecommendationController, "Recommendation Controller", "ASP.NET Core", "Handles recommendation requests")
     Component(StudentController, "Student Controller", "ASP.NET Core", "Handles student-related requests, including academic records")
     Component(AuthService, "Auth Service", "ASP.NET Core", "Handles user authentication requests and session validation")
   }
@@ -101,6 +113,13 @@ Rel(ReportUI, ReportGenerator, "Generates reports")
 Rel(CourseController, CourseService, "Routes course-related requests")
 Rel(StudentController, StudentService, "Routes student-related requests")
 Rel(AuthService, AuthController, "Manages authentication requests")
+Rel(RecommendationController, RecommendationApiHandler, "Routes recommendation requests")
+
+' Recommendation rels
+Rel(RecommendationEnginer, RecommentationDataAccessLayer, "Requests particular ML prediction")
+Rel(RecommendationApiHandler, RecommendationEnginer, "Requests particular ML prediction")
+Rel(RecommentationDataAccessLayer, PredictiveModel, "Requests particular ML prediction")
+
 
 ' StudentService relationships
 Rel(StudentService, StudentRepository, "Performs CRUD on student records")

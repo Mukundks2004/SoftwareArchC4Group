@@ -31,6 +31,8 @@ System_Boundary("UniversityCourseManagementSystemUCMS_boundary", "University Cou
   Container(APIGateway, "API Gateway", $techn="Routes HTTP requests to appropriate microservices and manages authentication.", $descr="ASP.NET Core", $tags="", $link="")
   Container(CourseEnrollmentService, "Course Enrollment Service", $techn="Manages course offerings and enrollments.", $descr="ASP.NET Core", $tags="", $link="")
   Container(StudentRecordService, "Student Record Service", $techn="Handles student academic records.", $descr="ASP.NET Core", $tags="", $link="")
+  Container(RecommendationService, "Recommendation Service", $techn="handles the logic for generating and serving recommendations", $descr="Node.js", $tags="", $link="")
+  Container(PredictiveModel, "Predictive Model", $techn="Uses ML to analyze and recommend.", $descr="Python w TensorFlow", $tags="", $link="")
 }
 
 System_Ext(SIS, "Student Information System (SIS)", $descr="Manages student and course data.", $tags="", $link="")
@@ -72,6 +74,11 @@ Rel(CourseEnrollmentService, StudentRecordService, "Updates student records afte
 Rel(CourseEnrollmentService, NotificationService, "Sends enrollment notifications", $techn="", $tags="", $link="")
 Rel(ReportingService, DataWarehouse, "Queries for analytics and reports", $techn="", $tags="", $link="")
 Rel(ETLPipeline, DataWarehouse, "Loads transformed data", $techn="", $tags="", $link="")
+Rel(APIGateway, RecommendationService, "Sends requests for recommendations", $techn="HTTP", $tags="", $link="")
+
+Rel(RecommendationService, PredictiveModel, "Access predictive analytics", $techn="GraphQL", $tags="", $link="")
+Rel(RecommendationService, AcademicRecordsDatabase, "Reads and writes student records", $techn="HTTP", $tags="", $link="")
+
 
 ' Bi-Directional Relationships
 BiRel(AcademicRecordsDatabase, ETLPipeline, "Provides/Loads academic data", $techn="", $tags="", $link="")
