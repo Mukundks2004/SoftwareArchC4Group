@@ -1,5 +1,7 @@
 @startuml UCMS_PHYSICAL_ERD
 
+title University Course Management System (UCMS) - Physical ERD
+
 entity "User" as User {
   * UserID : SERIAL [PK]
   --
@@ -83,7 +85,7 @@ entity "AcademicRecord" as AcademicRecord {
   --
   StudentID : INTEGER [FK]
   EnrollmentID : INTEGER [FK]
-  Grade : VARCHAR(2)
+  Grade : VARCHAR(3)
 }
 
 entity "HECS" as HECS {
