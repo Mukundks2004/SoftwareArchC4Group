@@ -8,10 +8,16 @@ left to right direction
 !include <C4/C4_Context>
 !include <C4/C4_Container>
 
-Person(Student, "Student", $descr="Enroll in courses and view academic records.", $tags="", $link="")
-Person(Faculty, "Faculty", $descr="Manage course offerings and track student enrollments.", $tags="", $link="")
-Person(Administrator, "Administrator", $descr="Manage data and generate reports.", $tags="", $link="")
-Person(ITDepartment, "IT Department", $descr="Manage system backups, integration, and security.", $tags="", $link="")
+skinparam linetype ortho 
+skinparam ranksep 300
+skinparam nodesep 120
+
+together {
+    Person(Student, "Student", "Enrolls in courses and views academic records.")
+    Person(Faculty, "Faculty", "Manages courses and tracks student performance.")
+    Person(Administrator, "Administrator", "Manages data and generates reports.")
+    Person(ITDepartment, "IT Department", "Manages backups, integrations, and security.")
+}
 
 System_Boundary("UniversityCourseManagementSystemUCMS_boundary", "University Course Management System (UCMS)", $tags="") {
   Container(ReportingService, "Reporting Service", $techn="Generates academic performance and enrollment reports.", $descr="ASP.NET Core", $tags="", $link="")
@@ -68,16 +74,11 @@ Rel(ReportingService, DataWarehouse, "Queries for analytics and reports", $techn
 Rel(ETLPipeline, DataWarehouse, "Loads transformed data", $techn="", $tags="", $link="")
 
 ' Bi-Directional Relationships
-Rel(AcademicRecordsDatabase, ETLPipeline, "Provides operational data", $techn="", $tags="", $link="")
-Rel(ETLPipeline, AcademicRecordsDatabase, "Loads processed data", $techn="", $tags="", $link="")
-Rel(StudentRecordService, AcademicRecordsDatabase, "Reads and writes student records", $techn="", $tags="", $link="")
-Rel(AcademicRecordsDatabase, StudentRecordService, "Provides student records", $techn="", $tags="", $link="")
-Rel(CourseEnrollmentService, AcademicRecordsDatabase, "Reads and writes course enrollment data", $techn="", $tags="", $link="")
-Rel(AcademicRecordsDatabase, CourseEnrollmentService, "Provides course enrollment data", $techn="", $tags="", $link="")
-Rel(ReportingService, AcademicRecordsDatabase, "Queries for data", $techn="", $tags="", $link="")
-Rel(AcademicRecordsDatabase, ReportingService, "Provides data for reporting", $techn="", $tags="", $link="")
-Rel(ReportingService, DataWarehouse, "Queries for data", $techn="", $tags="", $link="")
-Rel(DataWarehouse, ReportingService, "Provides aggregated data for reporting", $techn="", $tags="", $link="")
+BiRel(AcademicRecordsDatabase, ETLPipeline, "Provides/Loads academic data", $techn="", $tags="", $link="")
+BiRel(StudentRecordService, AcademicRecordsDatabase, "Reads and writes student records", $techn="", $tags="", $link="")
+BiRel(CourseEnrollmentService, AcademicRecordsDatabase, "Reads and writes course enrollment data", $techn="", $tags="", $link="")
+BiRel(AcademicRecordsDatabase, ReportingService, "Queries/Provides data for reporting", $techn="", $tags="", $link="")
+BiRel(DataWarehouse, ReportingService, "Queries/Provides aggregated data for reporting", $techn="", $tags="", $link="")
 
 Rel(BackupService, AcademicRecordsDatabase, "Backs up data to AWS S3", $techn="", $tags="", $link="")
 Rel(BackupService, AWSS3, "Backs up academic data to AWS S3", $techn="", $tags="", $link="")

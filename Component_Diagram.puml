@@ -1,51 +1,147 @@
 @startuml
-set separator none
-title University Course Management System (UCMS) - API Gateway - Components
 
-left to right direction
+top to bottom direction
 
 !include <C4/C4>
 !include <C4/C4_Context>
 !include <C4/C4_Container>
 !include <C4/C4_Component>
 
-System_Ext(SIS, "Student Information System (SIS)", $descr="External System for managing student and course data.")
-System_Ext(UniversitySSO, "University SSO", $descr="External Authentication System for SSO.")
-System_Ext(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="External Backup System for cloud-based data recovery.")
-System_Ext(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.")
-System_Ext(HECS, "HECS Debt System", "Manages student loans and debts.")
+skinparam linetype ortho 
+skinparam ranksep 200
+skinparam nodesep 160
 
-ContainerDb(DataWarehouse, "Data Warehouse", $techn="PostgreSQL (OLAP)", $descr="Stores historical and aggregated data for analytics and reporting.")
+title University Course Management System (UCMS) - Component Diagram
 
-Container_Boundary("APIGateway_boundary", "API Gateway", $tags="") {
-  Component(BackupService, "BackupService", $techn="", $descr="Manages backups of academic records and course data. Provides disaster recovery via AWS S3 (DSaaS).")
-  Component(CourseController, "CourseController", $techn="", $descr="Handles course enrollment and management requests.")
-  Component(StudentController, "StudentController", $techn="", $descr="Handles student-related requests, including academic records.")
-  Component(CourseService, "CourseService", $techn="", $descr="Manages course enrollment, availability, and updates. Auto-scales using AWS Elastic Beanstalk.")
-  Component(StudentService, "StudentService", $techn="", $descr="Manages student academic records and updates.")
-  Component(ReportingService, "ReportingService", $techn="", $descr="Generates academic and enrollment reports, sends data for analysis.")
-  Component(AuthService, "AuthService", $techn="", $descr="Handles authentication and access control using OAuth 2.0. Authenticates users via University SSO.")
-  Component(NotificationService, "NotificationService", $techn="", $descr="Sends notifications, such as enrollment success or academic updates.")
+together {
+    Person(Student, "Student", "Enrolls in courses and views academic records.")
+    Person(Faculty, "Faculty", "Manages courses and tracks student performance.")
+    Person(Administrator, "Administrator", "Manages data and generates reports.")
+    Person(ITDepartment, "IT Department", "Manages backups, integrations, and security.")
 }
 
-' Component Relationships
-Rel(CourseController, CourseService, "Handles course-related requests")
-Rel(StudentController, StudentService, "Handles student record-related requests")
-Rel(CourseService, HECS, "Checks loan eligibility and updates enrollment-related debts")
-Rel(StudentService, HECS, "Fetches and displays loan and debt information")
-Rel(ReportingService, HECS, "Aggregates data on loan statuses for institutional reporting")
-Rel(BackupService, AWSS3DSaaS, "Backs up course and academic data (AWS S3)")
-Rel(ReportingService, DataAnalyticsSystem, "Sends academic data for analysis")
-Rel(DataAnalyticsSystem, ReportingService, "Returns insights and analysis for reporting")
-Rel(CourseService, SIS, "Syncs course data with SIS")
-Rel(StudentService, SIS, "Syncs student data with SIS")
-Rel(AuthService, UniversitySSO, "Authenticates users via SSO (OAuth 2.0)")
-Rel(ReportingService, DataWarehouse, "Generates reports from historical data")
+System_Boundary(UCMS_Boundary, "University Course Management System (UCMS)") {
+  
+  Container_Boundary(WebAppBoundary, "Web Application", "Vue.js") {
+    Component(WebFrontend, "Web Frontend", "Vue.js", "User interface for accessing UCMS services")
+    Component(EnrollmentUI, "Enrollment UI", "Vue.js", "UI for enrolling in courses and displaying course info")
+    Component(ReportUI, "Report UI", "Vue.js", "UI for administrators to generate reports")
+  }
+  
+  Container_Boundary(AuthBoundary, "Authentication Service", "OAuth 2.0") {
+    Component(AuthController, "Auth Controller", "ASP.NET Core", "Handles login and session validation for users")
+    Component(SSOHandler, "SSO Handler", "OAuth 2.0", "Manages Single Sign-On (SSO) integration with AuthSys")
+    Component(TokenManager, "Token Manager", "C#", "Generates and validates access tokens for secure API access")
+    Component(RBACManager, "RBAC Manager", "C#", "Enforces Role-Based Access Control for data access permissions")
+  }
+  
+  Container_Boundary(CourseEnrollmentBoundary, "Course Enrollment Service", "ASP.NET Core") {
+    Component(CourseManager, "Course Manager", "C#", "Manages course catalog and availability")
+    Component(EnrollmentProcessor, "Enrollment Processor", "C#", "Processes student enrollments")
+    Component(SeatAllocator, "Seat Allocator", "C#", "Manages seat counts and allocations for courses")
+    Component(StudentService, "Student Service", "ASP.NET Core", "Handles student academic records and updates")
+    Component(CourseService, "Course Service", "ASP.NET Core", "Handles course-related operations and manages course data")
+  }
 
-' Internal Relationships within the UCMS System
-Rel(NotificationService, ReportingService, "Notifies when reports are generated")
-Rel(NotificationService, StudentService, "Sends notifications on academic record updates")
-Rel(NotificationService, CourseService, "Sends notifications on course enrollment updates")
+  Container_Boundary(NotificationBoundary, "Notification Service", "ASP.NET Core") {
+    Component(NotificationDispatcher, "Notification Dispatcher", "C#", "Sends notifications on enrollment events")
+    Component(NotificationQueue, "Notification Queue", "Azure Service Bus", "Queues notifications for processing asynchronously")
+  }
+
+  Container_Boundary(ReportingBoundary, "Reporting Service", "ASP.NET Core") {
+    Component(ReportGenerator, "Report Generator", "C#", "Generates academic and performance reports")
+    Component(AnalyticsFetcher, "Analytics Fetcher", "Python", "Fetches data from the Data Warehouse and Data Analytics system for analysis")
+  }
+
+  Container_Boundary(API_Gateway_Boundary, "API Gateway", "ASP.NET Core") {
+    Component(CourseController, "Course Controller", "ASP.NET Core", "Handles course enrollment and management requests")
+    Component(StudentController, "Student Controller", "ASP.NET Core", "Handles student-related requests, including academic records")
+    Component(AuthService, "Auth Service", "ASP.NET Core", "Handles user authentication requests and session validation")
+  }
+
+  Container_Boundary(DataLayerBoundary, "Data Layer") {
+    Component(CourseRepository, "Course Repository", "C#", "Performs CRUD operations for courses")
+    Component(StudentRepository, "Student Repository", "C#", "Performs CRUD operations for student records")
+  }
+
+  Container_Boundary(DataPipelineBoundary, "ETL Pipeline", "Python") {
+    Component(ETLProcessor, "ETL Processor", "Python", "Extracts, transforms, and loads data into the Data Warehouse")
+  }
+
+  ContainerDb(AcademicRecordsDatabase, "Academic Records Database", "PostgreSQL", "Stores student records, course data, and enrollment history.")
+  ContainerDb(DataWarehouse, "Data Warehouse", "PostgreSQL (OLAP)", "Stores historical and aggregated data for analytics and reporting.")
+  Component(BackupService, "Backup Service", "AWS S3", "Manages backups of academic records and course data.")
+}
+
+together {
+System_Ext(SIS, "Student Information System (SIS)", "Manages student and course data.")
+System_Ext(AWSS3, "AWS S3 (DSaaS)", "Provides cloud-based backup and recovery.")
+System_Ext(DataAnalytics, "Data Analytics System", "Processes and analyzes academic data for insights and reporting.")
+System_Ext(HECS, "HECS Debt System", "Manages student loans and debts.")
+System_Ext(AuthSys, "Authentication System", "Handles Single Sign-On (SSO) for user authentication.")
+}
+' Relationships for Web Application and Services
+Rel(Student, WebFrontend, "Interacts with", "HTTPS")
+Rel(Faculty, EnrollmentUI, "Interacts with", "HTTPS")
+Rel(Administrator, ReportUI, "Interacts with", "HTTPS")
+
+Rel(WebFrontend, AuthController, "Requests authentication and authorization")
+Rel(AuthController, SSOHandler, "Integrates with SSO for user authentication", "OAuth 2.0")
+Rel(SSOHandler, AuthSys, "Authenticates via SSO", "OAuth 2.0")
+Rel(AuthController, TokenManager, "Requests token generation and validation")
+Rel(TokenManager, WebFrontend, "Returns validated tokens for secure access")
+Rel(WebFrontend, RBACManager, "Checks role-based permissions for data access")
+
+Rel(EnrollmentUI, EnrollmentProcessor, "Initiates enrollments")
+Rel(EnrollmentProcessor, SeatAllocator, "Checks and allocates seats")
+Rel(CourseManager, EnrollmentProcessor, "Handles course enrollments")
+Rel(ReportUI, ReportGenerator, "Generates reports")
+
+' API Gateway relationships
+Rel(CourseController, CourseService, "Routes course-related requests")
+Rel(StudentController, StudentService, "Routes student-related requests")
+Rel(AuthService, AuthController, "Manages authentication requests")
+
+' StudentService relationships
+Rel(StudentService, StudentRepository, "Performs CRUD on student records")
+
+' CourseService relationships
+Rel(CourseService, CourseRepository, "Performs CRUD on course data")
+
+' External System Relationships
+Rel(CourseService, SIS, "Syncs course data with SIS", "Secure API")
+Rel(CourseManager, HECS, "Fetches loan eligibility and enrollment debt")
+Rel(ReportGenerator, AnalyticsFetcher, "Fetches analytics data")
+Rel(AnalyticsFetcher, DataWarehouse, "Queries historical data")
+Rel(AnalyticsFetcher, DataAnalytics, "Fetches processed insights for report generation", "ETL Processes")
+
+' Notification and HECS Integration
+Rel(EnrollmentProcessor, NotificationQueue, "Enqueues notifications", "Async")
+Rel(NotificationQueue, NotificationDispatcher, "Dispatches notifications", "Async")
+Rel(NotificationDispatcher, HECS, "Sends enrollment-related notifications", "Async")
+
+' Data Layer Relationships
+Rel(CourseService, CourseRepository, "Performs CRUD on course data")
+Rel(StudentService, StudentRepository, "Performs CRUD on student data")
+Rel(CourseRepository, AcademicRecordsDatabase, "Reads/Writes course data")
+Rel(StudentRepository, AcademicRecordsDatabase, "Reads/Writes student data")
+
+' Database Relationships
+BiRel(CourseManager, AcademicRecordsDatabase, "Reads and updates course catalog and enrollment data")
+BiRel(EnrollmentProcessor, AcademicRecordsDatabase, "Updates enrollment records")
+BiRel(ReportGenerator, AcademicRecordsDatabase, "Queries for report data")
+BiRel(ReportGenerator, DataWarehouse, "Queries historical data for reporting")
+
+' Backup System
+Rel(AcademicRecordsDatabase, BackupService, "Backs up data", "S3 API")
+
+' IT Department Relations
+Rel(ITDepartment, AcademicRecordsDatabase, "Manages database backup and restoration")
+Rel(ITDepartment, AWSS3, "Monitors and manages cloud backups", "S3 API")
+Rel(ITDepartment, NotificationQueue, "Configures and monitors asynchronous notifications")
+Rel(ITDepartment, AuthController, "Manages authentication and security configurations")
+Rel(ITDepartment, CourseManager, "Performs maintenance and manages course data sync with SIS")
+Rel(ITDepartment, DataWarehouse, "Oversees data pipeline and warehouse integration")
 
 SHOW_LEGEND(true)
 @enduml
