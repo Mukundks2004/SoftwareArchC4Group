@@ -1,13 +1,10 @@
 @startuml UCMS_Code_Diagram_With_Boundaries
 
-title UCMS - High Level Class Diagram 
+title University Course Management System (UCMS) - [High Level] Class Diagram 
 skinparam linetype ortho 
 skinparam ranksep 200
 skinparam nodesep 100
 top to bottom direction
-
-
-
 
 package "University Course Management System (UCMS)" <<Rectangle>> {
 

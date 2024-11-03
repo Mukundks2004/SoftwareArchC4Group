@@ -1,12 +1,13 @@
 @startuml
 set separator none
-title University Course Management System (UCMS) - Containers
+title University Course Management System (UCMS) - Container Diagram
 
 left to right direction
 
 !include <C4/C4>
 !include <C4/C4_Context>
 !include <C4/C4_Container>
+
 
 together {
     Person(Student, "Student", "Enrolls in courses and views academic records.")
@@ -59,7 +60,7 @@ Rel(APIGateway, HECS, "Routes requests for loan and debt data")
 ' Rel(StudentRecordService, HECS, "Fetches and displays loan and debt information")
 ' Rel(ReportingService, HECS, "Aggregates data on loan statuses for institutional reporting")
 
-Rel(ReportingService, DataAnalytics, "Provides data for reporting and insights", $techn="", $tags="", $link="")
+BiRel(ReportingService, DataAnalytics, "Provides/Receives data for reporting and insights", $techn="", $tags="", $link="")
 Rel(APIGateway, AWSElasticBeanstalkPaaS, "Auto-scales resources with AWS Elastic Beanstalk", $techn="", $tags="", $link="")
 Rel(WebApplication, APIGateway, "Routes requests", $techn="", $tags="", $link="")
 Rel(APIGateway, CourseEnrollmentService, "Handles course enrollment requests", $techn="", $tags="", $link="")
@@ -67,7 +68,6 @@ Rel(APIGateway, StudentRecordService, "Handles student record requests", $techn=
 Rel(APIGateway, ReportingService, "Generates academic reports", $techn="", $tags="", $link="")
 Rel(CourseEnrollmentService, StudentRecordService, "Updates student records after enrollment", $techn="", $tags="", $link="")
 Rel(CourseEnrollmentService, NotificationService, "Sends enrollment notifications", $techn="", $tags="", $link="")
-Rel(ReportingService, DataWarehouse, "Queries for analytics and reports", $techn="", $tags="", $link="")
 Rel(ETLPipeline, DataWarehouse, "Loads transformed data", $techn="", $tags="", $link="")
 
 ' Bi-Directional Relationships
@@ -75,7 +75,7 @@ BiRel(AcademicRecordsDatabase, ETLPipeline, "Provides/Loads academic data", $tec
 BiRel(StudentRecordService, AcademicRecordsDatabase, "Reads and writes student records", $techn="", $tags="", $link="")
 BiRel(CourseEnrollmentService, AcademicRecordsDatabase, "Reads and writes course enrollment data", $techn="", $tags="", $link="")
 BiRel(AcademicRecordsDatabase, ReportingService, "Queries/Provides data for reporting", $techn="", $tags="", $link="")
-BiRel(DataWarehouse, ReportingService, "Queries/Provides aggregated data for reporting", $techn="", $tags="", $link="")
+BiRel(DataWarehouse, ReportingService, "Queries/Provides data aggregated data for reporting", $techn="", $tags="", $link="")
 
 Rel(BackupService, AcademicRecordsDatabase, "Backs up data to AWS S3", $techn="", $tags="", $link="")
 Rel(BackupService, AWSS3, "Backs up academic data to AWS S3", $techn="", $tags="", $link="")
