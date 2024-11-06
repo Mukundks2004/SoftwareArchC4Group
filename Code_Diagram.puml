@@ -1,115 +1,203 @@
-@startuml UCMS_Code_Diagram
+@startuml UCMS_Code_Diagram_With_Boundaries
 
-title UCMS - Code Diagram (with Cloud Architecture)
+title University Course Management System (UCMS) - [High Level] Class Diagram 
+skinparam linetype ortho 
+skinparam ranksep 200
+skinparam nodesep 100
+top to bottom direction
 
-' Core Entities
-class Student {
-    + int StudentID <<PK>>
-    + string FirstName
-    + string LastName
-    + EnrollInCourse(Course course)
+package "University Course Management System (UCMS)" <<Rectangle>> {
+
+    ' Core Domain Entities Boundary
+    package "Core Domain Entities" <<Rectangle>> {
+        class Student {
+            + int StudentID <<PK>>
+            + string FirstName
+            + string LastName
+            + EnrollInCourse(Course course)
+        }
+
+        class Course {
+            + int CourseID <<PK>>
+            + string CourseName
+            + string CourseCode
+            + int Credits
+            + ManageEnrollment(Enrollment enrollment)
+        }
+
+        class Enrollment {
+            + int EnrollmentID <<PK>>
+            + int StudentID <<FK>> -- References Student.StudentID
+            + int CourseID <<FK>> -- References Course.CourseID
+            + string EnrollmentStatus
+        }
+
+        class AcademicRecord {
+            + int RecordID <<PK>>
+            + int StudentID <<FK>> -- References Student.StudentID
+            + int CourseID <<FK>> -- References Course.CourseID
+            + string Grade
+        }
+    }
+
+    ' Repositories Boundary
+    package "Repositories" <<Rectangle>> {
+        class CourseRepository {
+            + AddCourse(Course course)
+            + GetCourse(int courseID)
+            + UpdateCourse(Course course)
+            + RemoveCourse(int courseID)
+        }
+
+        class StudentRepository {
+            + AddStudent(Student student)
+            + GetStudent(int studentID)
+            + UpdateStudent(Student student)
+            + RemoveStudent(int studentID)
+        }
+    }
+
+    ' Authentication Service Boundary
+    package "Authentication Service" <<Rectangle>> {
+        class AuthController {
+            + Login(UserCredentials credentials)
+            + Logout(int userId)
+        }
+
+        class SSOHandler {
+            + AuthenticateWithSSO()
+        }
+
+        class TokenManager {
+            + GenerateToken(int userId)
+            + ValidateToken(string token)
+        }
+
+        class RBACManager {
+            + CheckPermissions(int userId, string action)
+        }
+    }
+
+    ' Course and Enrollment Management Components
+    package "Course Enrollment Service" <<Rectangle>> {
+        class CourseManager {
+            + AddCourse(Course course)
+            + UpdateCourse(Course course)
+            + CheckAvailability(int courseID)
+        }
+
+        class EnrollmentProcessor {
+            + ProcessEnrollment(Student student, Course course)
+            + CancelEnrollment(int enrollmentID)
+        }
+
+        class SeatAllocator {
+            + AllocateSeat(Course course)
+            + ReleaseSeat(Course course)
+        }
+
+        class StudentService {
+            + AddStudentRecord(Student student)
+            + UpdateStudentRecord(Student student)
+            + RetrieveStudentRecords(int studentId)
+        }
+    }
+
+    ' Notification Service Boundary
+    package "Notification Service" <<Rectangle>> {
+        class NotificationDispatcher {
+            + DispatchEnrollmentNotification(Student student, Course course)
+        }
+
+        class NotificationQueue {
+            + EnqueueNotification(Notification notification)
+            + ProcessNotifications()
+        }
+    }
+
+    ' Reporting and Data Analytics Components
+    package "Reporting and Analytics Service" <<Rectangle>> {
+        class ReportGenerator {
+            + GenerateEnrollmentReport()
+            + GenerateStudentPerformanceReport()
+        }
+
+        class AnalyticsFetcher {
+            + FetchDataForAnalytics()
+        }
+    }
+
+    ' Data Backup and Processing Components
+    package "Data Backup and ETL" <<Rectangle>> {
+        class BackupService {
+            + BackupAcademicData()
+            + RestoreAcademicData()
+        }
+
+        class ETLPipeline {
+            + ExtractData()
+            + TransformData()
+            + LoadData()
+        }
+    }
+
+    ' Cloud and Database Services Boundary
+    package "Cloud and Database Services" <<Rectangle>> {
+        class AcademicRecordsDatabase {
+            + StoreStudentRecord(Student student)
+            + StoreCourseRecord(Course course)
+            + StoreEnrollmentRecord(Enrollment enrollment)
+            + StoreAcademicRecord(AcademicRecord record)
+        }
+
+        class DataWarehouse {
+            + StoreAggregatedData()
+            + QueryHistoricalData()
+        }
+
+        class AWS_S3 {
+            + StoreAcademicBackup()
+            + RestoreBackup()
+        }
+
+        class AWS_ElasticBeanstalk {
+            + AutoScale()
+            + DeployApplication()
+        }
+    }
 }
 
-class Course {
-    + int CourseID <<PK>>
-    + string CourseName
-    + string CourseCode
-    + int Credits
-    + ManageEnrollment(Enrollment enrollment)
-}
-
-class Enrollment {
-    + int EnrollmentID <<PK>>
-    + int StudentID <<FK>> -- References Student.StudentID
-    + int CourseID <<FK>> -- References Course.CourseID
-    + string EnrollmentStatus
-}
-
-class AcademicRecord {
-    + int RecordID <<PK>>
-    + int StudentID <<FK>> -- References Student.StudentID
-    + int CourseID <<FK>> -- References Course.CourseID
-    + string Grade
-}
-
-' Repositories for Data Management
-class CourseRepository {
-    + AddCourse(Course course)
-    + GetCourse(int courseID)
-    + UpdateCourse(Course course)
-    + RemoveCourse(int courseID)
-}
-
-class StudentRepository {
-    + AddStudent(Student student)
-    + GetStudent(int studentID)
-    + UpdateStudent(Student student)
-    + RemoveStudent(int studentID)
-}
-
-' Services interacting with Repositories and Cloud
-class NotificationService {
-    + SendEnrollmentSuccessNotification(Student student, Course course)
-    + SendGradeNotification(Student student, AcademicRecord record)
-}
-
-class ReportingService {
-    + GenerateEnrollmentReport()
-    + GenerateStudentPerformanceReport()
-}
-
-class BackupService {
-    + BackupAcademicData()
-    + RestoreAcademicData()
-}
-
-class ETLPipeline {
-    + ExtractData()
-    + TransformData()
-    + LoadData()
-}
-
-' Cloud Services and Databases
-class AcademicRecordsDatabase {
-    + StoreStudentRecord(Student student)
-    + StoreCourseRecord(Course course)
-    + StoreEnrollmentRecord(Enrollment enrollment)
-    + StoreAcademicRecord(AcademicRecord record)
-}
-
-class AWS_S3 {
-    + StoreAcademicBackup()
-    + RestoreBackup()
-}
-
-class AWS_ElasticBeanstalk {
-    + AutoScale()
-    + DeployApplication()
-}
-
-' Relationships between core entities
+' Relationships among Core Entities
 Student "1" --> "*" Enrollment : "Enrolls in"
 Course "1" --> "*" Enrollment : "Is enrolled in"
 Student "1" --> "*" AcademicRecord : "Has"
 Course "1" --> "*" AcademicRecord : "Is recorded in"
 
-' Repositories connected to services
+' Repositories connected to core entities
 CourseRepository "1" --> "*" Course : "Manages course data"
 StudentRepository "1" --> "*" Student : "Manages student data"
 
-' Cloud interactions and data pipelines
-BackupService --> AWS_S3 : "Backs up academic and course data"
-AcademicRecordsDatabase --> BackupService : "Academic records backed up to AWS S3"
-ReportingService --> AWS_S3 : "Generates reports from data"
-ETLPipeline --> AcademicRecordsDatabase : "Extracts data from database"
+' Core relationships with main components only
+AuthController --> SSOHandler : "SSO authentication"
+AuthController --> TokenManager : "Token management"
+TokenManager --> RBACManager : "Access control"
+EnrollmentProcessor --> SeatAllocator : "Seat management"
+EnrollmentProcessor --> NotificationDispatcher : "Enrollment notifications"
+ReportGenerator --> AcademicRecordsDatabase : "Accesses records"
+ReportGenerator --> DataWarehouse : "Historical data"
+BackupService --> AWS_S3 : "Backs up data"
+AcademicRecordsDatabase --> BackupService : "Backup source"
+
 ETLPipeline --> AWS_S3 : "Loads transformed data into AWS S3"
+ETLPipeline --> DataWarehouse : "Transfers data for reporting"
+ETLPipeline --> AcademicRecordsDatabase : "Extracts data for analytics"
+
+' AWS Elastic Beanstalk relationships
 AWS_ElasticBeanstalk --> CourseRepository : "Auto-scales based on load"
 AWS_ElasticBeanstalk --> StudentRepository : "Auto-scales based on load"
 
 ' Notification interactions
-NotificationService --> Student : "Notifies enrollment success"
-NotificationService --> AcademicRecord : "Notifies grade updates"
-ReportingService --> Student : "Generates performance reports"
-ReportingService --> Course : "Generates enrollment reports"
+NotificationDispatcher  --> Student : "Notifies enrollment success"
+NotificationDispatcher  --> AcademicRecord : "Notifies grade updates"
 
 @enduml

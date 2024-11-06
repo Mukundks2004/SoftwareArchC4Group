@@ -1,0 +1,51 @@
+@startuml
+set separator none
+title University Course Management System (UCMS) - API Gateway - Components
+
+left to right direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Ext(SIS, "Student Information System (SIS)", $descr="External System for managing student and course data.")
+System_Ext(UniversitySSO, "University SSO", $descr="External Authentication System for SSO.")
+System_Ext(AWSS3DSaaS, "AWS S3 (DSaaS)", $descr="External Backup System for cloud-based data recovery.")
+System_Ext(DataAnalyticsSystem, "Data Analytics System", $descr="Processes and analyzes academic data for insights and reporting.")
+System_Ext(HECS, "HECS Debt System", "Manages student loans and debts.")
+
+ContainerDb(DataWarehouse, "Data Warehouse", $techn="PostgreSQL (OLAP)", $descr="Stores historical and aggregated data for analytics and reporting.")
+
+Container_Boundary("APIGateway_boundary", "API Gateway", $tags="") {
+  Component(BackupService, "BackupService", $techn="", $descr="Manages backups of academic records and course data. Provides disaster recovery via AWS S3 (DSaaS).")
+  Component(CourseController, "CourseController", $techn="", $descr="Handles course enrollment and management requests.")
+  Component(StudentController, "StudentController", $techn="", $descr="Handles student-related requests, including academic records.")
+  Component(CourseService, "CourseService", $techn="", $descr="Manages course enrollment, availability, and updates. Auto-scales using AWS Elastic Beanstalk.")
+  Component(StudentService, "StudentService", $techn="", $descr="Manages student academic records and updates.")
+  Component(ReportingService, "ReportingService", $techn="", $descr="Generates academic and enrollment reports, sends data for analysis.")
+  Component(AuthService, "AuthService", $techn="", $descr="Handles authentication and access control using OAuth 2.0. Authenticates users via University SSO.")
+  Component(NotificationService, "NotificationService", $techn="", $descr="Sends notifications, such as enrollment success or academic updates.")
+}
+
+' Component Relationships
+Rel(CourseController, CourseService, "Handles course-related requests")
+Rel(StudentController, StudentService, "Handles student record-related requests")
+Rel(CourseService, HECS, "Checks loan eligibility and updates enrollment-related debts")
+Rel(StudentService, HECS, "Fetches and displays loan and debt information")
+Rel(ReportingService, HECS, "Aggregates data on loan statuses for institutional reporting")
+Rel(BackupService, AWSS3DSaaS, "Backs up course and academic data (AWS S3)")
+Rel(ReportingService, DataAnalyticsSystem, "Sends academic data for analysis")
+Rel(DataAnalyticsSystem, ReportingService, "Returns insights and analysis for reporting")
+Rel(CourseService, SIS, "Syncs course data with SIS")
+Rel(StudentService, SIS, "Syncs student data with SIS")
+Rel(AuthService, UniversitySSO, "Authenticates users via SSO (OAuth 2.0)")
+Rel(ReportingService, DataWarehouse, "Generates reports from historical data")
+
+' Internal Relationships within the UCMS System
+Rel(NotificationService, ReportingService, "Notifies when reports are generated")
+Rel(NotificationService, StudentService, "Sends notifications on academic record updates")
+Rel(NotificationService, CourseService, "Sends notifications on course enrollment updates")
+
+SHOW_LEGEND(true)
+@enduml

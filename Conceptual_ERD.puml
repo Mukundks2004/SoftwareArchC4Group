@@ -1,37 +1,24 @@
 @startuml UCMS_Conceptual_ERD
 
+title UCMS - Conceptual @endproject Diagram
+
 entity "User" as User
-
 entity "Student" as Student
-
 entity "Faculty" as Faculty
-
 entity "Administrator" as Administrator
-
 entity "Department" as Department
-
 entity "Course" as Course
-
 entity "Enrollment" as Enrollment
-
 entity "Section" as Section
-
-entity "AcademicRecord" as AcademicRecord
-
+entity "Academic Record" as AcademicRecord
 entity "HECS" as HECS
-
 entity "Reports" as Reports
-
 entity "Payment" as Payment
-
-entity "SystemLog" as SystemLog
-
-' Define relationships
+entity "System Log" as SystemLog
 
 User ||--|| Student : "is a"
 User ||--|| Faculty : "is a"
 User ||--|| Administrator : "is a"
-
 Student ||--o{ Enrollment : "enrolls in"
 Course ||--o{ Enrollment : "has"
 Course ||--o{ Section : "has"
